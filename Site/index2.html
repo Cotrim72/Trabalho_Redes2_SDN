@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redes Definidas por Software (SDN)</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2933;
+    --muted: #5f6c7b;
+    --accent: #1d4e89;
+    --line: #d9e0e8;
+    --soft: #f1f5f9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12171d;
+      --text: #e6ebf0;
+      --muted: #9aa7b5;
+      --accent: #7fb2e8;
+      --line: #2b3541;
+      --soft: #1a212a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    line-height: 1.65;
+    color: var(--text);
+    background: var(--bg);
+  }
+  header, main, footer { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+  header { padding-top: 48px; padding-bottom: 24px; border-bottom: 2px solid var(--accent); }
+  h1 { font-size: 2rem; margin: 0 0 6px; color: var(--accent); }
+  header p { margin: 0; color: var(--muted); }
+  nav { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: Arial, sans-serif; font-size: .9rem; }
+  nav a { color: var(--accent); text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  section { padding: 32px 0; border-bottom: 1px solid var(--line); }
+  h2 { font-size: 1.5rem; margin: 0 0 12px; color: var(--accent); }
+  h3 { font-size: 1.1rem; margin: 22px 0 6px; }
+  p { margin: 0 0 10px; }
+  ul { padding-left: 22px; margin: 0 0 10px; }
+  .box { background: var(--soft); border-left: 4px solid var(--accent); padding: 10px 16px; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-family: Arial, sans-serif; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--soft); }
+  .scroll { overflow-x: auto; }
+  footer { padding-top: 24px; padding-bottom: 48px; color: var(--muted); font-size: .9rem; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Redes Definidas por Software (SDN)</h1>
+  <p>Nome do autor · Disciplina · Data</p>
+  <nav>
+    <a href="#introducao">Introdução</a>
+    <a href="#fundamentacao">Fundamentação Teórica</a>
+    <a href="#arquitetura">Arquitetura</a>
+    <a href="#interfaces">Interfaces e Protocolos</a>
+    <a href="#desafios">Desafios e Mitigações</a>
+    <a href="#aplicacoes">Aplicações</a>
+    <a href="#conclusao">Conclusão</a>
+    <a href="#perguntas">Perguntas</a>
+    <a href="#referencias">Referências</a>
+  </nav>
+</header>
+
+<main>
+
+<section id="introducao">
+  <h2>Introdução</h2>
+  <h3>Definição</h3>
+  <p>SDN é uma abordagem de rede que separa o plano de controle (decide para onde o tráfego vai) do plano de encaminhamento (move os pacotes), centralizando a inteligência em um controlador programável.</p>
+  <h3>Como surgiu?</h3>
+  <ul>
+    <li>Limitações das redes tradicionais, com configuração manual e equipamento a equipamento.</li>
+    <li>Pesquisas em redes programáveis e o projeto Ethane, em Stanford.</li>
+    <li>Criação do protocolo OpenFlow e da Open Networking Foundation (ONF).</li>
+  </ul>
+</section>
+
+<section id="fundamentacao">
+  <h2>Fundamentação Teórica</h2>
+  <h3>Rede Tradicional x SDN</h3>
+  <div class="scroll">
+  <table>
+    <thead>
+      <tr><th>Aspecto</th><th>Rede tradicional</th><th>SDN</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Plano de controle</td><td>Distribuído em cada equipamento</td><td>Centralizado no controlador</td></tr>
+      <tr><td>Configuração</td><td>Manual, por dispositivo</td><td>Programável, via software</td></tr>
+      <tr><td>Equipamentos</td><td>Hardware proprietário</td><td>Hardware simples e aberto</td></tr>
+      <tr><td>Visão da rede</td><td>Local</td><td>Global</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h3>Desafios</h3>
+  <ul>
+    <li>Complexidade e custo de gerenciamento das redes tradicionais.</li>
+    <li>Dificuldade de adaptar a rede a mudanças rápidas de demanda.</li>
+    <li>Dependência de fornecedores (vendor lock-in).</li>
+  </ul>
+</section>
+
+<section id="arquitetura">
+  <h2>Arquitetura</h2>
+  <p>Descreva aqui a visão geral da arquitetura em camadas e insira um diagrama, se desejar.</p>
+
+  <h3>Application Plane</h3>
+  <p>Aplicações e serviços que expressam o comportamento desejado da rede.</p>
+
+  <h3>Control Plane</h3>
+  <p>Controlador que traduz as políticas das aplicações em regras para os dispositivos.</p>
+
+  <h3>Forwarding Plane</h3>
+  <p>Dispositivos de rede que encaminham os pacotes conforme as regras recebidas.</p>
+
+  <h3>Management Plane</h3>
+  <p>Monitoramento, configuração e provisionamento dos dispositivos e do controlador.</p>
+
+  <h3>Operational Plane</h3>
+  <p>Gerencia o estado operacional dos dispositivos (por exemplo, ativo ou inativo, portas disponíveis).</p>
+
+  <h3>Network Services Abstraction Layer</h3>
+  <p>Camada que oferece às aplicações uma interface abstrata dos serviços de rede.</p>
+
+  <h3>Device and Resource Abstraction Layer</h3>
+  <p>Camada que abstrai os recursos de hardware, escondendo as diferenças entre dispositivos.</p>
+</section>
+
+<section id="interfaces">
+  <h2>Interfaces e Protocolos</h2>
+  <h3>OpenFlow</h3>
+  <p>Protocolo que permite ao controlador inserir, alterar e remover entradas na tabela de fluxos dos switches.</p>
+  <ul>
+    <li>Tabelas de fluxo: campos de correspondência, ações e contadores.</li>
+    <li>Mensagens entre controlador e switch.</li>
+  </ul>
+  <h3>CP e MP Southbound Interfaces</h3>
+  <ul>
+    <li><strong>Control Plane Southbound:</strong> comunicação do controlador com o plano de encaminhamento.</li>
+    <li><strong>Management Plane Southbound:</strong> configuração e gerenciamento dos dispositivos (exemplos: NETCONF, OVSDB).</li>
+  </ul>
+</section>
+
+<section id="desafios">
+  <h2>Desafios e Mitigações</h2>
+  <h3>Ponto único de falha</h3>
+  <p><strong>Desafio:</strong> a falha do controlador pode comprometer a rede.</p>
+  <div class="box"><strong>Mitigação:</strong> múltiplos controladores (cluster), redundância e replicação de estado.</div>
+
+  <h3>Segurança: Criptografia (TLS/SSL)</h3>
+  <p><strong>Desafio:</strong> a comunicação entre controlador e dispositivos é alvo de ataques.</p>
+  <div class="box"><strong>Mitigação:</strong> canais protegidos com TLS/SSL, autenticação mútua e controle de acesso.</div>
+
+  <h3>Escalabilidade e Desempenho</h3>
+  <p><strong>Desafio:</strong> o controlador pode se tornar um gargalo em redes grandes.</p>
+  <div class="box"><strong>Mitigação:</strong> controle distribuído ou hierárquico, balanceamento de carga e regras pré-instaladas.</div>
+</section>
+
+<section id="aplicacoes">
+  <h2>Aplicações</h2>
+  <h3>SD-WAN</h3>
+  <p>Gerenciamento centralizado de links WAN, com escolha dinâmica de caminhos conforme a qualidade e a política.</p>
+  <h3>Operadoras de Telecomunicações e Redes 5G (Telco SDN)</h3>
+  <p>Automação, fatiamento de rede (network slicing) e programabilidade do núcleo e do transporte.</p>
+  <h3>Datacenters</h3>
+  <p>Virtualização de redes, balanceamento de carga e engenharia de tráfego.</p>
+  <h3>SDN x NFV</h3>
+  <div class="scroll">
+  <table>
+    <thead>
+      <tr><th>Aspecto</th><th>SDN</th><th>NFV</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Foco</td><td>Separar controle e dados</td><td>Virtualizar funções de rede</td></tr>
+      <tr><td>Exemplo</td><td>Controlador OpenFlow</td><td>Firewall ou roteador virtual</td></tr>
+      <tr><td>Relação</td><td colspan="2">Tecnologias complementares, que podem ser usadas juntas.</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="conclusao">
+  <h2>Conclusão</h2>
+  <p>Resuma os principais pontos: o que é SDN, seus benefícios, seus desafios e as perspectivas futuras.</p>
+</section>
+
+<section id="perguntas">
+  <h2>Perguntas</h2>
+  <p>Obrigado! Há alguma pergunta?</p>
+</section>
+
+<section id="referencias" style="border-bottom:none">
+  <h2>Referências</h2>
+  <ul>
+    <li>SOBRENOME, Nome. <em>Título da obra</em>. Cidade: Editora, ano.</li>
+    <li>SOBRENOME, Nome. Título do artigo. <em>Periódico</em>, v. X, n. Y, ano.</li>
+    <li>Open Networking Foundation (ONF). Disponível em: https://opennetworking.org</li>
+  </ul>
+</section>
+
+</main>
+
+<footer>
+  <p>Modelo simples em HTML. Edite os textos e as tabelas conforme necessário.</p>
+</footer>
+
+</body>
+</html>
