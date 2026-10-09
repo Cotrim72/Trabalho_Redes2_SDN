@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redes Definidas por Software (SDN)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f6f9;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            margin-bottom: 10px;
+        }
+
+        nav {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        nav h3 {
+            margin-bottom: 10px;
+            color: #1e3a8a;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        nav a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        section {
+            background: #ffffff;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: #1e3a8a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            color: #1d4ed8;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+
+        p, ul {
+            margin-bottom: 12px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        .faq-item {
+            margin-bottom: 15px;
+        }
+
+        .faq-item h4 {
+            color: #0f172a;
+            margin-bottom: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Redes Definidas por Software (SDN)</h1>
+        <p>Visão geral, Arquitetura, Desafios e Aplicações</p>
+    </header>
+
+    <main>
+        <!-- Sumário / Navegação -->
+        <nav>
+            <h3>Sumário</h3>
+            <ul>
+                <li><a href="#introducao">1. Introdução</a></li>
+                <li><a href="#fundamentacao">2. Fundamentação Teórica</a></li>
+                <li><a href="#arquitetura">3. Arquitetura</a></li>
+                <li><a href="#interfaces">4. Interfaces e Protocolos</a></li>
+                <li><a href="#desafios">5. Desafios e Mitigações</a></li>
+                <li><a href="#aplicacoes">6. Aplicações</a></li>
+                <li><a href="#conclusao">7. Conclusão</a></li>
+                <li><a href="#perguntas">8. Perguntas</a></li>
+                <li><a href="#referencias">9. Referências</a></li>
+            </ul>
+        </nav>
+
+        <!-- 1. Introdução -->
+        <section id="introducao">
+            <h2>1. Introdução</h2>
+            <h3>Definição</h3>
+            <p><strong>Software-Defined Networking (SDN)</strong>, ou Redes Definidas por Software, é uma abordagem para arquitetura de rede onde o controle da rede é separado do hardware físico subjacente e centralizado em um elemento lógico chamado controlador.</p>
+            
+            <h3>Como surgiu?</h3>
+            <p>O conceito de SDN surgiu de pesquisas acadêmicas na Universidade de Stanford e na UC Berkeley por volta de 2008 (com o projeto Ethane e o protocolo OpenFlow). A motivação principal foi a necessidade de simplificar o gerenciamento de rede e permitir a inovação e o dinamismo que os data centers e a computação em nuvem exigiam, algo impossível de alcançar com as redes tradicionais rígidas.</p>
+        </section>
+
+        <!-- 2. Fundamentação Teórica -->
+        <section id="fundamentacao">
+            <h2>2. Fundamentação Teórica</h2>
+            <h3>Rede Tradicional x SDN</h3>
+            <ul>
+                <li><strong>Rede Tradicional:</strong> O plano de controle (tomada de decisão) e o plano de encaminhamento (envio de pacotes) estão acoplados dentro do próprio dispositivo de hardware (switches/roteadores). O gerenciamento é descentralizado e feito dispositivo por dispositivo.</li>
+                <li><strong>SDN:</strong> Separa o plano de controle do plano de encaminhamento. O controle é centralizado em um software (controlador SDN), permitindo a programação da rede de forma dinâmica e automatizada.</li>
+            </ul>
+
+            <h3>Desafios</h3>
+            <p>Transicionar de um modelo tradicional para SDN envolve quebra de paradigmas organizacionais, necessidade de requalificação de equipes, custos de migração, garantia de interoperabilidade entre equipamentos legados e novos sistemas, além de preocupações com a segurança da centralização do controle.</p>
+        </section>
+
+        <!-- 3. Arquitetura -->
+        <section id="arquitetura">
+            <h2>3. Arquitetura</h2>
+            <p>A arquitetura SDN é composta por diferentes planos e camadas de abstração:</p>
+            <ul>
+                <li><strong>Application Plane (Plano de Aplicação):</strong> Contém as aplicações e serviços de rede (como firewalls, roteamento, balanceadores de carga) que comunicam suas necessidades ao controlador.</li>
+                <li><strong>Control Plane (Plano de Controle):</strong> É o "cérebro" da rede. Mantém a visão global da topologia, toma decisões de roteamento e traduz as solicitações das aplicações para os dispositivos de rede.</li>
+                <li><strong>Forwarding Plane / Data Plane (Plano de Encaminhamento):</strong> Composto pelos elementos de hardware/software (switches) responsáveis apenas por aplicar as regras de encaminhamento e mover os pacotes de dados.</li>
+                <li><strong>Management Plane (Plano de Gerenciamento):</strong> Utilizado para provisionamento, monitoramento, configuração e tarefas administrativas do sistema SDN.</li>
+                <li><strong>Operational Plane (Plano Operacional):</strong> Responsável pela operação contínua, auditoria, análise de dados e medição de desempenho da rede.</li>
+                <li><strong>Networking Services Abstraction Layer (NSAL):</strong> Camada que abstrai os serviços de rede para as aplicações superiores por meio de APIs Northbound.</li>
+                <li><strong>Device e Resource Abstraction Layer (DRAL):</strong> Camada responsável por abstrair os detalhes do hardware subjacente por meio de APIs Southbound, permitindo ao controlador comunicar com diferentes tipos e marcas de dispositivos.</li>
+            </ul>
+        </section>
+
+        <!-- 4. Interfaces e Protocolos -->
+        <section id="interfaces">
+            <h2>4. Interfaces e Protocolos</h2>
+            <h3>OpenFlow</h3>
+            <p>O OpenFlow é o primeiro e mais amplamente adotado protocolo padronizado de comunicação em SDN. Ele permite que o controlador comande diretamente as tabelas de fluxo dos switches do plano de dados.</p>
+
+            <h3>CP e MP Southbound Interfaces (Interfaces Sul)</h3>
+            <p>As interfaces Southbound conectam o Plano de Controle (CP) e o Plano de Gerenciamento (MP) aos dispositivos do plano de dados. Exemplos incluem o próprio OpenFlow, NETCONF, OVSDB e gNMI.</p>
+        </section>
+
+        <!-- 5. Desafios e Mitigações -->
+        <section id="desafios">
+            <h2>5. Desafios e Mitigações</h2>
+            <h3>Ponto Único de Falha</h3>
+            <p><strong>Desafio:</strong> Sendo o controlador o elemento central, sua queda pode paralisar a rede.<br>
+            <strong>Mitigação:</strong> Utilização de controladores distribuídos ou clusterizados (como ONOS ou OpenDaylight), garantindo alta disponibilidade e redundância.</p>
+
+            <h3>Segurança: Criptografia (TLS/SSL)</h3>
+            <p><strong>Desafio:</strong> Interceptação do tráfego de controle entre o controlador e os switches.<br>
+            <strong>Mitigação:</strong> Obrigatoriedade do uso de canais criptografados com TLS/SSL para toda comunicação no canal de controle.</p>
+
+            <h3>Escalabilidade e Desempenho</h3>
+            <p><strong>Desafio:</strong> Gargalos no controlador devido ao grande volume de pacotes desconhecidos requerendo instrução.<br>
+            <strong>Mitigação:</strong> Arquitetura de controle hierárquica, processamento de fluxos reativo/proativo e switches inteligentes com suporte a P4.</p>
+        </section>
+
+        <!-- 6. Aplicações -->
+        <section id="aplicacoes">
+            <h2>6. Aplicações</h2>
+            <h3>SD-WAN (Software-Defined WAN)</h3>
+            <p>Aplicação da tecnologia SDN em redes de longa distância para gerenciar dinamicamente múltiplos tipos de conexões (MPLS, Internet, 4G/5G) com menor custo e maior eficiência.</p>
+
+            <h3>Operadoras de Telecomunicações e Redes 5G (Telco SDN)</h3>
+            <p>SDN possibilita a virtualização de funções de rede, criação de fatiamento de rede (Network Slicing) no 5G e gestão dinâmica de banda sob demanda.</p>
+
+            <h3>Datacenters</h3>
+            <p>Permite automação completa do provisionamento de redes virtuais, multitenancy seguro, otimização do uso de links e facilidade no orchestration de microsserviços e contêineres.</p>
+
+            <h3>SDN x NFV</h3>
+            <p>Enquanto o <strong>SDN</strong> separa o controle do encaminhamento para centralizar a inteligência, a <strong>NFV (Network Functions Virtualization)</strong> foca em virtualizar as funções de rede (como roteadores, firewalls e NATs), rodando-as em software sobre hardware genérico. São tecnologias complementares.</p>
+        </section>
+
+        <!-- 7. Conclusão -->
+        <section id="conclusao">
+            <h2>7. Conclusão</h2>
+            <p>A arquitetura SDN revolucionou a maneira como projetamos e operamos redes de computadores. Ao trazer a programabilidade e a automação do software para o mundo do hardware de rede, o SDN tornou-se o pilar fundamental para ecossistemas modernos como computação em nuvem, data centers de grande escala e redes 5G.</p>
+        </section>
+
+        <!-- 8. Perguntas -->
+        <section id="perguntas">
+            <h2>8. Perguntas Frequentes (FAQ)</h2>
+            <div class="faq-item">
+                <h4>1. O OpenFlow é obrigatório para que uma rede seja considerada SDN?</h4>
+                <p>Não. Embora o OpenFlow tenha sido o precursor, hoje existem outros protocolos e abordagens de SDN (como NETCONF, BGP-LS, P4 e APIs RESTful).</p>
+            </div>
+            <div class="faq-item">
+                <h4>2. Qual é a diferença entre Northbound e Southbound APIs?</h4>
+                <p>Northbound APIs comunicam o Controlador com as Aplicações de Rede. Southbound APIs comunicam o Controlador com os Dispositivos Físicos/Virtuais de Rede.</p>
+            </div>
+            <div class="faq-item">
+                <h4>3. O SDN substitui totalmente o hardware tradicional?</h4>
+                <p>Não. O hardware (switches/roteadores) ainda é necessário para encaminhar fisicamente os pacotes, mas passa a ser composto por equipamentos mais simples (Whitebox/Bare-metal) controlados via software.</p>
+            </div>
+        </section>
+
+        <!-- 9. Referências -->
+        <section id="referencias">
+            <h2>9. Referências</h2>
+            <ul>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; Modelo de Documentação Técnica - Redes Definidas por Software (SDN)</p>
+    </footer>
+
+</body>
+</html>
