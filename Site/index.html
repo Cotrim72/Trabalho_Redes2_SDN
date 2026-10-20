@@ -168,26 +168,121 @@
         <!-- 3. Arquitetura -->
         <section id="arquitetura">
             <h2>3. Arquitetura</h2>
-            <p>A arquitetura SDN é composta por diferentes planos e camadas de abstração:</p>
+            <p>Inicialmente, a visão que tinha sobre a SDN é que sua arquitetura podia ser subdividida em três camadas: aplicação, controle e dados. </p>
+            <p>A comunicação entre essas camadas ocorre por meio de duas interfaces principais: </p>
             <ul>
-                <li><strong>Application Plane (Plano de Aplicação):</strong> Contém as aplicações e serviços de rede (como firewalls, roteamento, balanceadores de carga) que comunicam suas necessidades ao controlador.</li>
-                <li><strong>Control Plane (Plano de Controle):</strong> É o "cérebro" da rede. Mantém a visão global da topologia, toma decisões de roteamento e traduz as solicitações das aplicações para os dispositivos de rede.</li>
-                <li><strong>Forwarding Plane / Data Plane (Plano de Encaminhamento):</strong> Composto pelos elementos de hardware/software (switches) responsáveis apenas por aplicar as regras de encaminhamento e mover os pacotes de dados.</li>
-                <li><strong>Management Plane (Plano de Gerenciamento):</strong> Utilizado para provisionamento, monitoramento, configuração e tarefas administrativas do sistema SDN.</li>
-                <li><strong>Operational Plane (Plano Operacional):</strong> Responsável pela operação contínua, auditoria, análise de dados e medição de desempenho da rede.</li>
-                <li><strong>Networking Services Abstraction Layer (NSAL):</strong> Camada que abstrai os serviços de rede para as aplicações superiores por meio de APIs Northbound.</li>
-                <li><strong>Device e Resource Abstraction Layer (DRAL):</strong> Camada responsável por abstrair os detalhes do hardware subjacente por meio de APIs Southbound, permitindo ao controlador comunicar com diferentes tipos e marcas de dispositivos.</li>
+                <li><strong> Northbound API:  </strong> Responsável pela comunicação entre o Plano de Aplicação e o Plano de Controle. </li>
+                <li><strong> Southbound API:  </strong> Responsável por interligar o Plano de Controle ao Plano de Dados. </li>
             </ul>
+            <div style="display: flex; justify-content: center; align-items: center; padding: 10px 0;">
+                <figure style="margin: 0; width: 100%; max-width: 500px; text-align: center;">
+                    <img src="arquitetura1.webp" style="width: 100%; height: auto; display: block; border-radius: 8px;" alt="Arquitetura inicial">
+                    <figcaption style="font-size: 14px; color: #666; margin-top: 8px; font-style: italic;">
+                        Imagem retirada de https://www.geeksforgeeks.org/computer-networks/software-defined-networking/
+                    </figcaption>
+                </figure>
+            </div>
+            <p> Esse modelo evidencia o princípio central da SDN: a separação física e lógica entre os planos de controle e de dados. Nela, o controlador SDN (SDN Controller) assume a inteligência e as decisões de encaminhamento, enquanto os switches operam exclusivamente no plano de dados. </p>
+            <p> O controlador mantém uma visão lógica centralizada de toda a topologia da rede, o que simplifica o encaminhamento, o cálculo de rotas e a deteção de falhas. </p>
+            <p> O processo de construção da topologia e das tabelas de fluxo ocorre da seguinte maneira: </p>
+            <ul>
+                <li> <strong> Descoberta de Topologia: </strong> O controlador descobre a topologia enviando pacotes especiais (como o LLDP - Link Layer Discovery Protocol) por meio dos comutadores para mapear exatamente como cada porta está conectada. </li>
+                <li> <strong> Representação em Grafo:  </strong> O controlador constrói um grafo G=(V,E) em memória, onde V são os comutadores e E são os links entre eles (com pesos como latência, perda de pacote ou capacidade do link). </li>
+                <li> <strong> Cálculo da Rota: </strong> Quando chega uma nova requisição de fluxo, o controlador executa algoritmos como Dijkstra (para menor caminho/latência) ou Constrained Shortest Path First (CSPF) para considerar restrições de largura de banda e QoS. </li>
+                <li> <strong> Instalação das Regras: </strong> O controlador envia as regras calculadas para as tabelas de fluxo dos switches envolvidos via protocolo Southbound (ex.: OpenFlow). </li>
+            </ul>
+            <p> Uma problemática importante em redes tradicionais é como podemos prevenir loops. O RIP não consegue evitar por completo loops e o OSPF só evita por completo loops se todos os roteadores tiverem a mesma topologia da rede.</p>
+            <p> Em SDN, o problema dos loops é mitigado de forma diferente graças à centralização e à lógica programável:</p>
+            <p> Como o controlador possui o grafo completo da rede, ele calcula caminhos acíclicos ponta a ponta antes de enviar as regras para os switches. Ele simplesmente não instala rotas que formem ciclos fechados para o mesmo fluxo de dados.</p>
+            <p> No entanto, ainda há risco de haver loops na SDN, O maior risco de loops em SDN acontece durante atualizações dinâmicas de rotas (quando o controlador tenta reencaminhar um fluxo e atualiza alguns switches antes de outros, criando temporariamente um loop de convergência). Para evitar isso, utilizam-se duas estratégias principais </p>
+            <ul>
+                <li> <strong> Atualizações em Duas Fases (Two-Phase Commit): </strong> O controlador grava as novas regras nos switches ao longo do novo caminho com um tag/VLAN diferente. Apenas quando todos os switches intermediários possuem a nova regra, o controlador atualiza o switch de entrada (ingress switch) para começar a etiquetar os pacotes com a nova rota. </li>
+                <li> <strong> Regras Baseadas em Match Inequívoco: </strong> Cada entrada na Flow Table possui campos rígidos de correspondência (Match fields como IP de origem, IP de destino, porta TCP, etc.). O pacote só toma um único caminho pré-determinado, impedindo que circule indefinidamente. </li>
+            </ul>
+            <p> Os switches deixam de tomar decisões complexas de roteamento autonomamente. Eles limitam-se a consultar as suas tabelas de fluxo (flow tables) e executar as ações instruídas pelo controlador (por exemplo: encaminhar pela porta X, descartar pacote, alterar cabeçalho). </p>
+
+            <p> A rfc 7426 traz uma nova arquitetura sendo subdividida em 5 planos: aplicação, controle, gerenciamento, encaminhamento e operacional.</p>
+            <div style="display: flex; justify-content: center; align-items: center; padding: 10px 0;">
+                <figure style="margin: 0; width: 100%; max-width: 500px; text-align: center;">
+                    <img src="arquitetura2.jpg" style="width: 100%; height: auto; display: block; border-radius: 8px;" alt="Arquitetura recomendada pela rfc">
+                    <figcaption style="font-size: 14px; color: #666; margin-top: 8px; font-style: italic;">
+                        Imagem retirada de https://sdn.ieee.org/newsletter/september-2017/overview-of-rfc7426-sdn-layers-and-architecture-terminology
+                    </figcaption>
+                </figure>
+            </div>
+
+            <h3> Application Plane (Plano de Aplicação) </h3>
+            <p> O plano onde residem as aplicações e os serviços que definem o comportamento da rede. Contém as aplicações e serviços de rede (como firewalls, roteamento, balanceadores de carga) que comunicam suas necessidades ao controlador.</p>
+            <p> Esse plano é essencial para tornar a SDN programável. Por meio dele, as aplicações de negócio interagem com o controlador de forma abstrata, sem precisar conhecer os detalhes internos do plano de controle ou da infraestrutura física da rede.</p>
+
+            <h3> Control Plane (Plano de Controle) </h3>
+            <p> É o "cérebro" da rede, centrado na figura do controlador SDN. Ele mantém a topologia lógica em tempo real (links ativos, latência atual, portas conectadas, largura de banda disponível) para calcular o menor caminho ou a melhor rota dinamicamente. O controlador toma as decisões inteligentes de sinalização, decide o caminho ponta a ponta e instala as instruções (flows) nos comutadores do Plano de Encaminhamento.</p>
+
+            <h3> Management Plane (Plano de Gerenciamento)</h3>
+            <p>  Mantém o inventário global dos ativos (quais dispositivos existem, seus endereços de gerenciamento, estados de licença, versões de software e topologia física administrativa).  O Plano de Gerenciamento vai além do monitoramento. Ele é responsável pelo provisionamento de ciclo de vida, configurações estáticas e políticas de longo prazo (ex.: atualizar firmware, configurar autenticação TLS, inicializar parâmetros de portas). Ele cuida da configuração do sistema, enquanto o controle cuida da dinâmica dos fluxos. </p>
+
+            <h3> Forwarding Plane / Data Plane (Plano de Encaminhamento) </h3>
+            <p> Composto pelos elementos de hardware/software (switches) responsáveis apenas por aplicar as regras de encaminhamento e mover os pacotes de dados. </p>
+            <p> Ele executa as regras da Tabela de Fluxo (Flow Table) enviadas pelo controle. Ele apenas encaminha, altera cabeçalhos ou descarta pacotes no hardware. </p>
+
+            <h3> Operational Plane (Plano Operacional) </h3>
+            <p> Ele gerencia o estado das portas, disponibilidade de memória e recursos de hardware do próprio dispositivo. Responsável pela operação contínua, auditoria, análise de dados e medição de desempenho da rede. </p>
+
+            <h3> NSAL — Network Service Abstraction Layer (Camada de Abstração de Serviços de Rede) </h3>
+            <p> Oferece uma abstração unificada dos serviços e recursos disponibilizados pelos planos subjacentes, servindo de ponte para as aplicações e serviços finais (Service e App). </p>
+            <p> Fornece às aplicações de alto nível um ponto de acesso genérico e simplificado para programar, orquestrar e consumir os serviços de rede, sem ter de lidar diretamente com a complexidade do controlo interno da rede.</p>
+
+            <h3> DAL — Device and Resource Abstraction Layer (Camada de Abstração de Dispositivos e Recursos) </h3>
+            <p> Atua como uma camada intermédia de abstração dos recursos físicos ou virtuais do hardware/dispositivo de rede. </p>
+            <p> Isola as especificidades de hardware do dispositivo, permitindo que os planos de controle e de gestão interajam com os recursos da rede de forma padronizada e independente de fabricante. </p>
         </section>
 
         <!-- 4. Interfaces e Protocolos -->
         <section id="interfaces">
             <h2>4. Interfaces e Protocolos</h2>
+            <p> Para haver a comunicação entre as camadas e os planos existem interfaces e protocolos que realizam essa função.</p>
+            <h3> CP e MP Southbound Interfaces (Interfaces Sul)</h3>
+            <p> As interfaces Southbound conectam o Plano de Controle (CP) e o Plano de Gerenciamento (MP) aos dispositivos do plano de dados. Exemplos incluem o OpenFlow, NETCONF, OVSDB e gNMI.</p>
             <h3>OpenFlow</h3>
-            <p>O OpenFlow é o primeiro e mais amplamente adotado protocolo padronizado de comunicação em SDN. Ele permite que o controlador comande diretamente as tabelas de fluxo dos switches do plano de dados.</p>
+            <p> O OpenFlow é o primeiro e mais amplamente adotado protocolo padronizado de comunicação em SDN, ele atua na interface CP Southbound. Ele permite que o controlador comande diretamente as tabelas de fluxo dos switches do plano de dados.</p>
+            <p> O protocolo opera através de um Canal Seguro estabelecido entre o Controlador SDN e os comutadores OpenFlow, utilizando principalmente os seguintes mecanismos: </p>
+            <ul> 
+                <li> <strong> Tabelas de Fluxo (Flow Tables): </strong> O OpenFlow define que o encaminhamento de pacotes não é mais baseado apenas em endereços IP tradicionais ou portas VLAN fixas, mas sim em regras de fluxo compostas por correspondências (match fields), contadores e ações. </li>
+                <div style="display: flex; justify-content: center; align-items: center; padding: 10px 0;">
+                    <figure style="margin: 0; width: 100%; max-width: 500px; text-align: center;">
+                        <img src="OpenFlowtable.png" style="width: 100%; height: auto; display: block; border-radius: 8px;" alt="Arquitetura recomendada pela rfc">
+                        <figcaption style="font-size: 14px; color: #666; margin-top: 8px; font-style: italic;">
+                            Imagem retirada de https://www.researchgate.net/figure/OpenFlow-V100-Flow-Table-Architecture_fig7_315734989
+                        </figcaption>
+                    </figure>
+                </div>
+                <li> <strong> Mensagens Packet-In: </strong> Quando um pacote chega a um switch e não encontra nenhuma regra correspondente na sua tabela local (flow miss), o switch encapsula esse pacote e o envia para o controlador via OpenFlow para que este decida o que fazer com ele. </li>
+                <li> <strong> Mensagens Flow-Mod: </strong> Após analisar o pacote recebido, o controlador calcula a rota ou política de segurança e envia uma mensagem OpenFlow de modificação de fluxo para instalar a regra diretamente na memória rápida (TCAM) do switch. A partir daí, os pacotes seguintes da mesma sessão são tratados diretamente no hardware em velocidade máxima. </li>
+                <li> <strong> Mensagens Packet-Out: </strong> Permite que o controlador envie ativamente um pacote para fora através de uma porta específica de um comutador. </li>
+            </ul>
+            <p> Fornece ao controlador uma visibilidade completa da topologia da rede e do estado dos fluxos, permitindo otimizações complexas de engenharia de tráfego.</p>
+            <p> Facilita testes de novos algoritmos de roteamento, balanceamento de carga e políticas de segurança diretamente via software, sem a necessidade de atualizar o firmware físico de cada switch da rede. </p>
+            <h3> NETCONF </h3>
+            <p> O NETCONF (Network Configuration Protocol) é um protocolo de gerenciamento e configuração de rede desenvolvido pelo IETF (RFC 6241). Em vez de focar no encaminhamento de pacotes em tempo real (como o OpenFlow), o NETCONF foi desenhado para configurar, gerenciar, instalar e atualizar o estado e as políticas de dispositivos de rede de forma programática. </p>
+            <p> Enquanto o Openflow é utilizada para fazer a comunicação entre o plano de controle e o plano de dados, o NETCONF é normalmente utilizado para para interligar o plano de gerenciamento e o plano operacional, ou seja, partipando da interface MP Southbound.</p>
+            <p> O NETCONF trabalha em conjunto estrito com a linguagem de modelagem YANG. Isso significa que o controlador não envia comandos arbitrários de linha de comando (CLI), mas sim estruturas de dados bem definidas (árvores hierárquicas em XML ou JSON).</p>
+            <p> O NETCONF introduz o conceito de bases de dados de configuração distintas nos equipamentos, tais como: </p>
+            <ul>
+                <li> <strong> Running: </strong> A configuração atualmente ativa no dispositivo. </li>
+                <li> <strong> Candidate: </strong> Um espaço de rascunho onde o controlador pode testar e preparar alterações antes de aplicá-las. </li>
+                <li> <strong> Startup: </strong> A configuração que será carregada quando o dispositivo for reiniciado. </li>
+            </ul>
+            <p> Oferece comandos robustos e transacionais , permitindo que alterações complexas sejam aplicadas de forma atômica (tudo ou nada). </p>
+            <p> Suporta mecanismos de subscrição (Event Notifications), permitindo que o dispositivo informe ativamente ao controlador sobre falhas, alterações de estado ou alarmes. </p>
+            <p> Utiliza tipicamente o SSH (Secure Shell) garantindo autenticação, integridade e criptografia das mensagens. </p>
+            <h3> Northbound Interface </h3>
+            <p> A interface Northbound oferece a comunicação entre os planos de controle e gerenciamento e o plano de aplicação. </p>
+            <p> Diferente da interface Southbound (que possui padrões consolidados de mercado como o OpenFlow), a interface Northbound na RFC 7426 e no ecossistema SDN é predominantemente baseada em APIs e modelos de dados orientados a serviços. Os principais padrões utilizados incluem: </p>
+            <ul>
+                <li> <strong> REST / RESTful APIs (HTTP): </strong> O padrão mais difundido na indústria para a interface Northbound. Permite que as aplicações comuniquem com o controlador SDN utilizando requisições HTTP (GET, POST, PUT, DELETE) e payloads em JSON ou XML. </li>
+                <li> <strong> gRPC / Protocol Buffers: </strong> Utilizado em arquiteturas modernas de SDN de alto desempenho. O gRPC oferece comunicação bidirecional rápida baseada em HTTP/2 e serialização eficiente, sendo ideal para streaming de telemetria e controle em tempo real. </li>
+            </ul>
 
-            <h3>CP e MP Southbound Interfaces (Interfaces Sul)</h3>
-            <p>As interfaces Southbound conectam o Plano de Controle (CP) e o Plano de Gerenciamento (MP) aos dispositivos do plano de dados. Exemplos incluem o próprio OpenFlow, NETCONF, OVSDB e gNMI.</p>
         </section>
 
         <!-- 5. Desafios e Mitigações -->
@@ -248,8 +343,51 @@
         <!-- 9. Referências -->
         <section id="referencias">
             <h2>9. Referências</h2>
-            <ul>
-            </ul>
+            <div class="referencias" style="font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.5;">
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    CISCO. <b>Software-Defined Networking (SDN): What It Is and How It Works</b>. Disponível em: &lt;https://www.cisco.com/c/en/us/solutions/software-defined-networking/overview.html&gt;. Acesso em: 19 out. 2026.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    ERICKSON, D. The Beacon Openflow Controller. In: ACM SIGCOMM WORKSHOP ON HOT TOPICS IN SOFTWARE DEFINED NETWORKING (HOTSDN), 2., 2013, Verona. <b>Proceedings...</b> New York: ACM, 2013. p. 13-18.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    GEEKSFORGEEKS. <b>Software Defined Networking (SDN)</b>. Disponível em: &lt;https://www.geeksforgeeks.org/computer-networks/software-defined-networking/&gt;. Acesso em: 19 out. 2026.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    HALEPLIDIS, E. Overview of RFC7426: SDN layers and architecture terminology. <b>IEEE SDN Newsletter</b>, set. 2017. Disponível em: &lt;https://sdn.ieee.org/newsletter/september-2017/overview-of-rfc7426-sdn-layers-and-architecture-terminology&gt;. Acesso em: 19 out. 2026.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 1953</b>: GZIP file format specification version 4.3. Disponível em: &lt;https://www.rfc-editor.org/info/rfc1953&gt;. Acesso em: 19 out. 2026.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 2297</b>: Remote Managed Client-Initiated Transfer Protocol. Disponível em: &lt;https://www.rfc-editor.org/info/rfc2297&gt;. Acesso em: 19 out. 2026.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 7149</b>: Software-Defined Networking: A Perspective from Within a Service Provider Environment. Disponível em: &lt;https://www.rfc-editor.org/info/rfc7149&gt;. Acesso em: 19 out. 2026.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 7426</b>: Software-Defined Networking (SDN): Layers and Architecture Terminology. Disponível em: &lt;https://www.rfc-editor.org/info/rfc7426/&gt;. Acesso em: 19 out. 2026.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    KREUTZ, D. et al. Software-Defined Networking: A Comprehensive Survey. <b>Proceedings of the IEEE</b>, v. 103, n. 1, p. 14-76, jan. 2015. Disponível em: &lt;https://conferences.sigcomm.org/sigcomm/2015/pdf/papers/keynote.pdf&gt;. Acesso em: 19 out. 2026.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    KUROSE, James F.; ROSS, Keith W. <b>Redes de computadores e a internet</b>: uma abordagem top-down. Tradução: Francisco Araújo da Costa. Revisão técnica: Wagner Zucchi. 8. ed. Porto Alegre: Bookman; São Paulo: Pearson, 2021.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    SILVA, A. et al. Security in Software-Defined Networking: A survey. <b>Security and Communication Networks</b>, v. 2018, p. 1-22, 2018. Disponível em: &lt;https://onlinelibrary.wiley.com/doi/abs/10.1002/sec.1737&gt;. Acesso em: 19 out. 2026.
+                </p>
+            </div>
         </section>
     </main>
 
