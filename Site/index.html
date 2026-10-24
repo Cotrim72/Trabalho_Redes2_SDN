@@ -133,12 +133,13 @@
                 <li><a href="#introducao">1. Introdução</a></li>
                 <li><a href="#fundamentacao">2. Fundamentação Teórica</a></li>
                 <li><a href="#arquitetura">3. Arquitetura</a></li>
-                <li><a href="#interfaces">4. Interfaces e Protocolos</a></li>
-                <li><a href="#desafios">5. Desafios e Mitigações</a></li>
-                <li><a href="#aplicacoes">6. Aplicações</a></li>
-                <li><a href="#conclusao">7. Conclusão</a></li>
-                <li><a href="#perguntas">8. Perguntas</a></li>
-                <li><a href="#referencias">9. Referências</a></li>
+                <li><a href="#ferramentas">4. Ferramentas</a></li>
+                <li><a href="#funcionamento"> 5. Funcionamento</a></li>
+                <li><a href="#desafios">6. Desafios e Mitigações</a></li>
+                <li><a href="#aplicacoes">7. Aplicações</a></li>
+                <li><a href="#conclusao">8. Conclusão</a></li>
+                <li><a href="#perguntas">9. Perguntas</a></li>
+                <li><a href="#referencias">10. Referências</a></li>
             </ul>
         </nav>
 
@@ -184,24 +185,10 @@
             </div>
             <p> Esse modelo evidencia o princípio central da SDN: a separação física e lógica entre os planos de controle e de dados. Nela, o controlador SDN (SDN Controller) assume a inteligência e as decisões de encaminhamento, enquanto os switches operam exclusivamente no plano de dados. </p>
             <p> O controlador mantém uma visão lógica centralizada de toda a topologia da rede, o que simplifica o encaminhamento, o cálculo de rotas e a deteção de falhas. </p>
-            <p> O processo de construção da topologia e das tabelas de fluxo ocorre da seguinte maneira: </p>
-            <ul>
-                <li> <strong> Descoberta de Topologia: </strong> O controlador descobre a topologia enviando pacotes especiais (como o LLDP - Link Layer Discovery Protocol) por meio dos comutadores para mapear exatamente como cada porta está conectada. </li>
-                <li> <strong> Representação em Grafo:  </strong> O controlador constrói um grafo G=(V,E) em memória, onde V são os comutadores e E são os links entre eles (com pesos como latência, perda de pacote ou capacidade do link). </li>
-                <li> <strong> Cálculo da Rota: </strong> Quando chega uma nova requisição de fluxo, o controlador executa algoritmos como Dijkstra (para menor caminho/latência) ou Constrained Shortest Path First (CSPF) para considerar restrições de largura de banda e QoS. </li>
-                <li> <strong> Instalação das Regras: </strong> O controlador envia as regras calculadas para as tabelas de fluxo dos switches envolvidos via protocolo Southbound (ex.: OpenFlow). </li>
-            </ul>
-            <p> Uma problemática importante em redes tradicionais é como podemos prevenir loops. O RIP não consegue evitar por completo loops e o OSPF só evita por completo loops se todos os roteadores tiverem a mesma topologia da rede.</p>
-            <p> Em SDN, o problema dos loops é mitigado de forma diferente graças à centralização e à lógica programável:</p>
-            <p> Como o controlador possui o grafo completo da rede, ele calcula caminhos acíclicos ponta a ponta antes de enviar as regras para os switches. Ele simplesmente não instala rotas que formem ciclos fechados para o mesmo fluxo de dados.</p>
-            <p> No entanto, ainda há risco de haver loops na SDN, O maior risco de loops em SDN acontece durante atualizações dinâmicas de rotas (quando o controlador tenta reencaminhar um fluxo e atualiza alguns switches antes de outros, criando temporariamente um loop de convergência). Para evitar isso, utilizam-se duas estratégias principais </p>
-            <ul>
-                <li> <strong> Atualizações em Duas Fases (Two-Phase Commit): </strong> O controlador grava as novas regras nos switches ao longo do novo caminho com um tag/VLAN diferente. Apenas quando todos os switches intermediários possuem a nova regra, o controlador atualiza o switch de entrada (ingress switch) para começar a etiquetar os pacotes com a nova rota. </li>
-                <li> <strong> Regras Baseadas em Match Inequívoco: </strong> Cada entrada na Flow Table possui campos rígidos de correspondência (Match fields como IP de origem, IP de destino, porta TCP, etc.). O pacote só toma um único caminho pré-determinado, impedindo que circule indefinidamente. </li>
-            </ul>
+            <p> Ao contrário das redes tradicionais, cujos switches e roteadores realizam o encaminhamento com base em prefixos IP de destino, os dispositivos em redes SDN utilizam tabelas de fluxo (flow tables), permitindo decisões de encaminhamento refinadas e programáveis baseadas em múltiplos campos do cabeçalho (Match-Action).</p>
             <p> Os switches deixam de tomar decisões complexas de roteamento autonomamente. Eles limitam-se a consultar as suas tabelas de fluxo (flow tables) e executar as ações instruídas pelo controlador (por exemplo: encaminhar pela porta X, descartar pacote, alterar cabeçalho). </p>
 
-            <p> A rfc 7426 traz uma nova arquitetura sendo subdividida em 5 planos: aplicação, controle, gerenciamento, encaminhamento e operacional.</p>
+            <p> A partir da RFC 7426, foi proposta uma nova arquitetura subdividida em cinco planos: aplicação, controle, gerenciamento, encaminhamento e operacional.</p>
             <div style="display: flex; justify-content: center; align-items: center; padding: 10px 0;">
                 <figure style="margin: 0; width: 100%; max-width: 500px; text-align: center;">
                     <img src="arquitetura2.jpg" style="width: 100%; height: auto; display: block; border-radius: 8px;" alt="Arquitetura recomendada pela rfc">
@@ -238,9 +225,8 @@
         </section>
 
         <!-- 4. Interfaces e Protocolos -->
-        <section id="interfaces">
-            <h2>4. Interfaces e Protocolos</h2>
-            <p> Para haver a comunicação entre as camadas e os planos existem interfaces e protocolos que realizam essa função.</p>
+        <section id="ferramentas">
+            <h2>4. Ferramentas</h2>
             <h3> CP e MP Southbound Interfaces (Interfaces Sul)</h3>
             <p> As interfaces Southbound conectam o Plano de Controle (CP) e o Plano de Gerenciamento (MP) aos dispositivos do plano de dados. Exemplos incluem o OpenFlow, NETCONF, OVSDB e gNMI.</p>
             <h3>OpenFlow</h3>
@@ -282,28 +268,97 @@
                 <li> <strong> REST / RESTful APIs (HTTP): </strong> O padrão mais difundido na indústria para a interface Northbound. Permite que as aplicações comuniquem com o controlador SDN utilizando requisições HTTP (GET, POST, PUT, DELETE) e payloads em JSON ou XML. </li>
                 <li> <strong> gRPC / Protocol Buffers: </strong> Utilizado em arquiteturas modernas de SDN de alto desempenho. O gRPC oferece comunicação bidirecional rápida baseada em HTTP/2 e serialização eficiente, sendo ideal para streaming de telemetria e controle em tempo real. </li>
             </ul>
+            <h3> Open vSwitch(OVS)</h3>
+            <p> O open vSwitch é o principal switch utilizado dentro da arquitetura da SDN para redes virtuais. </p>
+            <p> O Open vSwitch é um switch virtual multicamada (multilayer virtual switch) de código aberto licenciado sob a licença Apache 2.0. Ele foi projetado para operar em ambientes de virtualização (como KVM, Xen e Proxmox), permitindo gerenciar o tráfego de rede entre máquinas virtuais (VMs) e containers dentro de um mesmo host físico ou entre múltiplos hosts por meio de túneis virtuais. </p>
+            <p> O OVS divide sua inteligência e processamento de pacotes em duas partes principais para otimizar o desempenho: </p>
+            <ul>
+                <li> <strong> Fast Path (Caminho Rápido - Kernel Space): </strong> Onde a grande maioria dos pacotes é processada. Se o OVS encontra uma regra de fluxo (flow) já conhecida no cache do kernel (ou via DPDK em espaço de usuário), ele encaminha o pacote instantaneamente com altíssima performance. </li>
+                <li> <strong> Slow Path (Caminho Lento - User Space): </strong>Composto por daemons como o ovs-vswitchd e o ovsdb-server. Quando um pacote chega e não se encaixa em nenhuma regra existente no cache do kernel, ele é enviado para o user space. Lá, o OVS decide o que fazer (consultando suas tabelas locais ou um controlador SDN externo) e injeta uma nova regra de fluxo no fast path para que os próximos pacotes semelhantes passem direto. </li>
+            </ul>
+            <p> Vantagens: </p>
+            <ul> 
+                <li><strong> Programabilidade Avançada: </strong>  Suporte nativo a protocolos de gerenciamento e automação (OpenFlow, OVSDB, NetFlow, sFlow).</li>
+                <li><strong> Virtualização de Rede Avançada: </strong> Suporte nativo a encapsulamentos de túnel complexos exigidos em nuvens modernas (VXLAN, GRE, Geneve).</li>
+                <li><strong> Alta Performance: </strong> Com o uso de aceleração via DPDK (Data Plane Development Kit) ou processamento direto no kernel, atinge taxas de transferência compatíveis com ambientes de produção de alta escala. </li>
+                <li><strong> Integração de Mercado:</strong> É o padrão de facto em plataformas como OpenStack e serve de base para o OVN (Open Virtual Network).</li>
+            </ul>
+            <p> Desvantagens: </p>
+            <ul>
+                <li><strong> Consumo de Recursos: </strong> Como roda em software, o OVS consome ciclos de CPU do host físico para processar o tráfego (embora o DPDK mitigue isso, ele exige mais processamento que um switch ASIC físico dedicado).</li>
+                <li><strong> Complexidade de Diagnóstico: </strong> Depurar problemas de perda de pacotes ou latência em ambientes altamente dinâmicos com múltiplos túneis e regras de fluxo pode ser desafiador.</li>
+            </ul>
 
         </section>
 
-        <!-- 5. Desafios e Mitigações -->
-        <section id="desafios">
-            <h2>5. Desafios e Mitigações</h2>
-            <h3>Ponto Único de Falha</h3>
-            <p><strong>Desafio:</strong> Sendo o controlador o elemento central, sua queda pode paralisar a rede.<br>
-            <strong>Mitigação:</strong> Utilização de controladores distribuídos ou clusterizados (como ONOS ou OpenDaylight), garantindo alta disponibilidade e redundância.</p>
+        <!-- 5. Funcionamento -->
+        <section id="funcionamento">
+            <h2>5. Funcionamento</h2>
+            <h3> Construção da topologia </h3>
+            <p> O processo de construção da topologia e das tabelas de fluxo ocorre da seguinte maneira: </p>
+            <ul>
+                <li> <strong> Descoberta de Topologia: </strong> O controlador descobre a topologia enviando pacotes especiais (como o LLDP - Link Layer Discovery Protocol) por meio dos comutadores para mapear exatamente como cada porta está conectada. </li>
+                <li> <strong> Representação em Grafo:  </strong> O controlador constrói um grafo G=(V,E) em memória, onde V são os comutadores e E são os links entre eles (com pesos como latência, perda de pacote ou capacidade do link). </li>
+                <li> <strong> Cálculo da Rota: </strong> Quando chega uma nova requisição de fluxo, o controlador executa algoritmos como Dijkstra (para menor caminho/latência) ou Constrained Shortest Path First (CSPF) para considerar restrições de largura de banda e QoS. </li>
+                <li> <strong> Instalação das Regras: </strong> O controlador envia as regras calculadas para as tabelas de fluxo dos switches envolvidos via protocolo Southbound (ex.: OpenFlow). </li>
+            </ul>
+            <h3> Prevenção de Loops </h3>
+            <p> Uma problemática importante em redes tradicionais é como podemos prevenir loops. O RIP não consegue evitar por completo loops e o OSPF só evita por completo loops se todos os roteadores tiverem a mesma topologia da rede.</p>
+            <p> Em SDN, o problema dos loops é mitigado de forma diferente graças à centralização e à lógica programável:</p>
+            <p> Como o controlador possui o grafo completo da rede, ele calcula caminhos acíclicos ponta a ponta antes de enviar as regras para os switches. Ele simplesmente não instala rotas que formem ciclos fechados para o mesmo fluxo de dados.</p>
+            <p> No entanto, ainda há risco de haver loops na SDN, O maior risco de loops em SDN acontece durante atualizações dinâmicas de rotas (quando o controlador tenta reencaminhar um fluxo e atualiza alguns switches antes de outros, criando temporariamente um loop de convergência). Para evitar isso, utilizam-se duas estratégias principais </p>
+            <ul>
+                <li> <strong> Atualizações em Duas Fases (Two-Phase Commit): </strong> O controlador grava as novas regras nos switches ao longo do novo caminho com um tag/VLAN diferente. Apenas quando todos os switches intermediários possuem a nova regra, o controlador atualiza o switch de entrada (ingress switch) para começar a etiquetar os pacotes com a nova rota. </li>
+                <li> <strong> Regras Baseadas em Match Inequívoco: </strong> Cada entrada na Flow Table possui campos rígidos de correspondência (Match fields como IP de origem, IP de destino, porta TCP, etc.). O pacote só toma um único caminho pré-determinado, impedindo que circule indefinidamente. </li>
+            </ul>
+        </section>
 
+        <!-- 6. Desafios e Mitigações -->
+        <section id="desafios">
+            <h2>6. Desafios e Mitigações</h2>
+            <h3>Ponto Único de Falha e Escalabilidade</h3>
+            <p> No modelo tradicional de SDN, adota-se um controlador centralizado responsável por gerenciar as tabelas de fluxo dos switches no plano de dados. Contudo, essa arquitetura apresenta limitações críticas: além de constituir um ponto único de falha (Single Point of Failure - SPOF) — cuja indisponibilidade paralisa o encaminhamento de pacotes —, a centralização gera um gargalo de escalabilidade, dificultando o suporte a redes de grande porte com alto volume de requisições. </p>
+            <p> Com base nisso surge o controlador distribuído (Cluster) que consiste em múltiplos nós de controladores trabalhando em conjunto para gerenciar a infraestrutura. </p>
+            <p> Entre suas vantagens temos: alta disponibilidade, tolerância a falhas (resiliência) e escalabilidade geográfica. Exemplos famosos incluem o OpenDaylight e o ONOS rodando em modo cluster.</p>
+            <h4> OpenDaylight(ODL) </h4>
+            <p> O OpenDaylight, gerido pela Linux Foundation, é o projeto de controlador SDN open-source mais antigo e abrangente da indústria. </p>
+            <p> É uma plataforma modular extremamente flexível construída em Java (sobre o framework OSGi). O ODL funciona como uma "caixa de ferramentas": ele não impõe uma única aplicação de rede, mas fornece dezenas de módulos que você pode ativar ou desativar conforme a necessidade (suportando OpenFlow, NETCONF/YANG, BGP, OSPF, etc.).</p>
+            <p> Foco Principal: Redes de grandes empresas (Enterprise), data centers corporativos e ambientes heterogêneos que precisam integrar tecnologias tradicionais e programáveis.</p>
+            <p> Vantagens: </p>
+            <ul>
+                <li> Ecossistema massivo e maduro, com suporte a uma enorme variedade de protocolos Southbound.</li>
+                <li> Extremamente flexível e personalizável para diferentes use-cases. </li>
+            </ul>
+            <p> Desvantagem: </p>
+            <ul>
+                <li> Curva de aprendizado íngreme e alta complexidade de configuração devido à sua arquitetura modular pesada. </li>
+            </ul>
+            <h4> ONOS </h4>
+            <p> O ONOS, também hospedado pela Linux Foundation, foi construído do zero com um foco diferente: atender às demandas de redes de operadoras de telecomunicações (Carrier-Grade e WANs de alta escala).</p>
+            <p> Foi projetado desde o início para operar em cluster distribuído, priorizando alta disponibilidade, resiliência e desempenho em tempo real. Ele trata o cluster de controladores como um único sistema operacional de rede lógico. O ONOS aposta fortemente no conceito de Intent-Based Networking (redes baseadas em intenção). </p>
+            <p> Foco Principal: Provedores de serviços de internet (ISPs), redes de longa distância (WAN), redes de acesso óptico e infraestruturas críticas onde a queda de um nó não pode derrubar a rede. </p>
+            <p> Vantagens: </p>
+            <ul>
+                <li> Arquitetura distribuída nativa altamente eficiente (ótima para evitar o SPOF e garantir escalabilidade) </li>
+                <li> Excelente desempenho (throughput e latência no processamento de fluxos). </li>
+                <li> Foco em abstrações de alto nível (Intents). </li>
+            </ul>
+            <p> Desvantagem: </p>
+            <ul>
+                <li> Pode ser excessivamente complexo se implantado em redes pequenas ou ambientes que exigem apenas simplicidade monolítica. </li>
+            </ul>
             <h3>Segurança: Criptografia (TLS/SSL)</h3>
             <p><strong>Desafio:</strong> Interceptação do tráfego de controle entre o controlador e os switches.<br>
             <strong>Mitigação:</strong> Obrigatoriedade do uso de canais criptografados com TLS/SSL para toda comunicação no canal de controle.</p>
 
-            <h3>Escalabilidade e Desempenho</h3>
+            <h3>Desempenho</h3>
             <p><strong>Desafio:</strong> Gargalos no controlador devido ao grande volume de pacotes desconhecidos requerendo instrução.<br>
             <strong>Mitigação:</strong> Arquitetura de controle hierárquica, processamento de fluxos reativo/proativo e switches inteligentes com suporte a P4.</p>
         </section>
 
-        <!-- 6. Aplicações -->
+        <!-- 7. Aplicações -->
         <section id="aplicacoes">
-            <h2>6. Aplicações</h2>
+            <h2>7. Aplicações</h2>
             <h3>SD-WAN (Software-Defined WAN)</h3>
             <p>Aplicação da tecnologia SDN em redes de longa distância para gerenciar dinamicamente múltiplos tipos de conexões (MPLS, Internet, 4G/5G) com menor custo e maior eficiência.</p>
 
@@ -317,32 +372,20 @@
             <p>Enquanto o <strong>SDN</strong> separa o controle do encaminhamento para centralizar a inteligência, a <strong>NFV (Network Functions Virtualization)</strong> foca em virtualizar as funções de rede (como roteadores, firewalls e NATs), rodando-as em software sobre hardware genérico. São tecnologias complementares.</p>
         </section>
 
-        <!-- 7. Conclusão -->
+        <!-- 8. Conclusão -->
         <section id="conclusao">
-            <h2>7. Conclusão</h2>
+            <h2>8. Conclusão</h2>
             <p>A arquitetura SDN revolucionou a maneira como projetamos e operamos redes de computadores. Ao trazer a programabilidade e a automação do software para o mundo do hardware de rede, o SDN tornou-se o pilar fundamental para ecossistemas modernos como computação em nuvem, data centers de grande escala e redes 5G.</p>
         </section>
 
-        <!-- 8. Perguntas -->
+        <!-- 9. Perguntas -->
         <section id="perguntas">
-            <h2>8. Perguntas Frequentes (FAQ)</h2>
-            <div class="faq-item">
-                <h4>1. O OpenFlow é obrigatório para que uma rede seja considerada SDN?</h4>
-                <p>Não. Embora o OpenFlow tenha sido o precursor, hoje existem outros protocolos e abordagens de SDN (como NETCONF, BGP-LS, P4 e APIs RESTful).</p>
-            </div>
-            <div class="faq-item">
-                <h4>2. Qual é a diferença entre Northbound e Southbound APIs?</h4>
-                <p>Northbound APIs comunicam o Controlador com as Aplicações de Rede. Southbound APIs comunicam o Controlador com os Dispositivos Físicos/Virtuais de Rede.</p>
-            </div>
-            <div class="faq-item">
-                <h4>3. O SDN substitui totalmente o hardware tradicional?</h4>
-                <p>Não. O hardware (switches/roteadores) ainda é necessário para encaminhar fisicamente os pacotes, mas passa a ser composto por equipamentos mais simples (Whitebox/Bare-metal) controlados via software.</p>
-            </div>
+            <h2>9. Perguntas </h2>
         </section>
 
-        <!-- 9. Referências -->
+        <!-- 10. Referências -->
         <section id="referencias">
-            <h2>9. Referências</h2>
+            <h2>10. Referências</h2>
             <div class="referencias" style="font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.5;">
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
                     CISCO. <b>Software-Defined Networking (SDN): What It Is and How It Works</b>. Disponível em: &lt;https://www.cisco.com/c/en/us/solutions/software-defined-networking/overview.html&gt;. Acesso em: 19 out. 2026.
