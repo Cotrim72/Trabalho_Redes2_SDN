@@ -133,7 +133,7 @@
                 <li><a href="#introducao">1. Introdução</a></li>
                 <li><a href="#fundamentacao">2. Fundamentação Teórica</a></li>
                 <li><a href="#arquitetura">3. Arquitetura</a></li>
-                <li><a href="#ferramentas">4. Ferramentas</a></li>
+                <li><a href="#protocolos">4. Ferramentas</a></li>
                 <li><a href="#funcionamento"> 5. Funcionamento</a></li>
                 <li><a href="#desafios">6. Desafios e Mitigações</a></li>
                 <li><a href="#aplicacoes">7. Aplicações</a></li>
@@ -206,32 +206,40 @@
             <p> É o "cérebro" da rede, centrado na figura do controlador SDN. Ele mantém a topologia lógica em tempo real (links ativos, latência atual, portas conectadas, largura de banda disponível) para calcular o menor caminho ou a melhor rota dinamicamente. O controlador toma as decisões inteligentes de sinalização, decide o caminho ponta a ponta e instala as instruções (flows) nos comutadores do Plano de Encaminhamento.</p>
 
             <h3> Management Plane (Plano de Gerenciamento)</h3>
-            <p>  Mantém o inventário global dos ativos (quais dispositivos existem, seus endereços de gerenciamento, estados de licença, versões de software e topologia física administrativa).  O Plano de Gerenciamento vai além do monitoramento. Ele é responsável pelo provisionamento de ciclo de vida, configurações estáticas e políticas de longo prazo (ex.: atualizar firmware, configurar autenticação TLS, inicializar parâmetros de portas). Ele cuida da configuração do sistema, enquanto o controle cuida da dinâmica dos fluxos. </p>
+            <p> O plano de gerenciamento realiza a configuração de base do dispositivo: define interfaces (estado, velocidade, endereçamento), cria bridges e associa portas a elas, configura VLANs, habilita protocolos auxiliares (SSH, NETCONF, SNMP, LLDP, NTP) e estabelece as políticas de acesso e autenticação (usuários, perfis, certificados TLS). Também habilita o agente OpenFlow, informando o endereço do controlador, a versão do protocolo e o modo de falha. Essa configuração é relativamente estática e prepara o equipamento para que o plano de controle passe a programar o encaminhamento. </p>
+            <p> O plano de gerenciamento é responsável pelas políticas de acesso administrativo aos dispositivos, como autenticação de usuários, perfis de autorização, ACLs na interface de gerenciamento e provisionamento de credenciais e certificados TLS. Já a proteção do canal OpenFlow (autenticação mútua) e das APIs northbound é aplicada pelos planos de controle e de aplicação, enquanto as políticas de tráfego da rede são implementadas por regras de fluxo no plano de encaminhamento. </p>
 
             <h3> Forwarding Plane / Data Plane (Plano de Encaminhamento) </h3>
             <p> Composto pelos elementos de hardware/software (switches) responsáveis apenas por aplicar as regras de encaminhamento e mover os pacotes de dados. </p>
             <p> Ele executa as regras da Tabela de Fluxo (Flow Table) enviadas pelo controle. Ele apenas encaminha, altera cabeçalhos ou descarta pacotes no hardware. </p>
 
             <h3> Operational Plane (Plano Operacional) </h3>
-            <p> Ele gerencia o estado das portas, disponibilidade de memória e recursos de hardware do próprio dispositivo. Responsável pela operação contínua, auditoria, análise de dados e medição de desempenho da rede. </p>
+            <p> Ele gerencia o estado das portas, disponibilidade de memória e recursos de hardware do próprio dispositivo.  </p>
 
-            <h3> NSAL — Network Service Abstraction Layer (Camada de Abstração de Serviços de Rede) </h3>
+            <h3> NSAL — Network Services Abstraction Layer (Camada de Abstração de Serviços de Rede) </h3>
             <p> Oferece uma abstração unificada dos serviços e recursos disponibilizados pelos planos subjacentes, servindo de ponte para as aplicações e serviços finais (Service e App). </p>
             <p> Fornece às aplicações de alto nível um ponto de acesso genérico e simplificado para programar, orquestrar e consumir os serviços de rede, sem ter de lidar diretamente com a complexidade do controlo interno da rede.</p>
 
             <h3> DAL — Device and Resource Abstraction Layer (Camada de Abstração de Dispositivos e Recursos) </h3>
             <p> Atua como uma camada intermédia de abstração dos recursos físicos ou virtuais do hardware/dispositivo de rede. </p>
             <p> Isola as especificidades de hardware do dispositivo, permitindo que os planos de controle e de gestão interajam com os recursos da rede de forma padronizada e independente de fabricante. </p>
+
+            <h3> CAL — Control Abstraction Layer (Camada de Abstração de Controle) </h3>
+            <p> É a camada que abstrai os recursos de encaminhamento do dispositivo para o plano de controle. Por meio dela, o controlador programa o comportamento de encaminhamento (tabelas de fluxo, grupos, medidores) sem depender do hardware específico de cada fabricante. Corresponde à interface southbound do plano de controle, e é nela que atua o protocolo OpenFlow, usado para instalar regras, receber Packet-In e Port-Status e consultar estatísticas. </p>
+
+            <h3> MAL — Management Abstraction Layer (Camada de Abstração de Gerenciamento) </h3>
+            <p> É a camada que abstrai os recursos do dispositivo para o plano de gerenciamento. Por meio dela, o gerenciamento provisiona, configura e supervisiona o equipamento, acessando tanto sua configuração quanto o estado mantido no plano operacional. Corresponde à interface southbound do plano de gerenciamento, e é nela que atuam protocolos como o NETCONF, o OVSDB e o SNMP. </p>
+
         </section>
 
-        <!-- 4. Interfaces e Protocolos -->
-        <section id="ferramentas">
-            <h2>4. Ferramentas</h2>
+        <!-- 4. Protocolos e Tecnologias -->
+        <section id="protocolos">
+            <h2>4. Protocolos e Tecnologias da SDN</h2>
             <h3> CP e MP Southbound Interfaces (Interfaces Sul)</h3>
-            <p> As interfaces Southbound conectam o Plano de Controle (CP) e o Plano de Gerenciamento (MP) aos dispositivos do plano de dados. Exemplos incluem o OpenFlow, NETCONF, OVSDB e gNMI.</p>
+            <p> As interfaces Southbound conectam o Plano de Controle (CP) e o Plano de Gerenciamento (MP) aos dispositivos do plano de dados. Exemplos incluem o OpenFlow, NETCONF, SNMP e OVSDB.</p>
             <h3>OpenFlow</h3>
             <p> O OpenFlow é o primeiro e mais amplamente adotado protocolo padronizado de comunicação em SDN, ele atua na interface CP Southbound. Ele permite que o controlador comande diretamente as tabelas de fluxo dos switches do plano de dados.</p>
-            <p> O protocolo opera através de um Canal Seguro estabelecido entre o Controlador SDN e os comutadores OpenFlow, utilizando principalmente os seguintes mecanismos: </p>
+            <p> O protocolo opera através de um Canal Seguro, por meior de uma conexão TCP/TLS, estabelecido entre o Controlador SDN e os comutadores OpenFlow, utilizando principalmente os seguintes mecanismos: </p>
             <ul> 
                 <li> <strong> Tabelas de Fluxo (Flow Tables): </strong> O OpenFlow define que o encaminhamento de pacotes não é mais baseado apenas em endereços IP tradicionais ou portas VLAN fixas, mas sim em regras de fluxo compostas por correspondências (match fields), contadores e ações. </li>
                 <div style="display: flex; justify-content: center; align-items: center; padding: 10px 0;">
@@ -242,25 +250,62 @@
                         </figcaption>
                     </figure>
                 </div>
-                <li> <strong> Mensagens Packet-In: </strong> Quando um pacote chega a um switch e não encontra nenhuma regra correspondente na sua tabela local (flow miss), o switch encapsula esse pacote e o envia para o controlador via OpenFlow para que este decida o que fazer com ele. </li>
-                <li> <strong> Mensagens Flow-Mod: </strong> Após analisar o pacote recebido, o controlador calcula a rota ou política de segurança e envia uma mensagem OpenFlow de modificação de fluxo para instalar a regra diretamente na memória rápida (TCAM) do switch. A partir daí, os pacotes seguintes da mesma sessão são tratados diretamente no hardware em velocidade máxima. </li>
-                <li> <strong> Mensagens Packet-Out: </strong> Permite que o controlador envie ativamente um pacote para fora através de uma porta específica de um comutador. </li>
+                <li> <strong> Mensagens Hello (OFPT_HELLO): </strong> Trocada imediatamente após a conexão TCP/TLS ser estabelecida. Serve para os dispositivos negociarem a versão mais alta do protocolo suportada por ambos. </li>
+                <li> <strong> Mensagens Features (OFPT_FEATURES_REQUEST / REPLY): </strong> O controlador solicita os recursos básicos do switch (como número de tabelas e portas suportadas). </li>
+                <li> <strong> Mensagens Packet-Out (OFPT_PACKET_OUT): </strong>  O controlador envia um pacote de rede bruto para o switch e ordena que ele o injete na rede por uma porta específica. </li>
+                <li> <strong> Mensagens Flow Removed (OFPT_FLOW_REMOVED): </strong>  Informa ao controlador que uma regra de fluxo expirou (por idle timeout ou hard timeout) ou foi removida pelo switch. </li>
+                <li> <strong> Mensagens Port Status (OFPT_PORT_STATUS): </strong> Notifica o controlador sobre mudanças físicas nas interfaces do switch (ex: um cabo foi desconectado e a porta ficou down). </li>
+                <li> <strong> Mensagens Status / Multipart (OFPT_STATS_REQUEST/ REPLY, OFPT_MULTIPART_REQUEST / REPLY): </strong> Solicita estatísticas detalhadas ao switch (ex: contadores de pacotes por fluxo, tráfego por porta). </li>
+                <li> <strong> Mensagens Echo (OFPT_ECHO_REQUEST / REPLY) </strong>  Mensagens de Keep-Alive (ping) para monitorar a saúde do canal de controle, medir latência e garantir que o outro lado continua ativo. </li>
+                <li> <strong> Mensagens Packet-In (OFPT_PACKET_IN): </strong> Quando um pacote chega a um switch e não encontra nenhuma regra correspondente na sua tabela local (flow miss), o switch encapsula esse pacote e o envia para o controlador via OpenFlow para que este decida o que fazer com ele. </li>
+                <li> <strong> Mensagens Flow-Mod (OFPT_FLOW_MOD): </strong> Após analisar o pacote recebido, o controlador calcula a rota ou política de segurança e envia uma mensagem OpenFlow de modificação de fluxo para instalar a regra diretamente na memória rápida (TCAM) do switch. A partir daí, os pacotes seguintes da mesma sessão são tratados diretamente no hardware em velocidade máxima. </li>
+                <li> <strong> Mensagens Configuration (OFPT_SET_CONFIG / GET_CONFIG): </strong>  Define ou consulta parâmetros operacionais no switch (ex: fragmentação de pacotes). </li>
             </ul>
             <p> Fornece ao controlador uma visibilidade completa da topologia da rede e do estado dos fluxos, permitindo otimizações complexas de engenharia de tráfego.</p>
             <p> Facilita testes de novos algoritmos de roteamento, balanceamento de carga e políticas de segurança diretamente via software, sem a necessidade de atualizar o firmware físico de cada switch da rede. </p>
+            <h3> SNMP </h3>
+            <p> O SNMP (Simple Network Management Protocol) é o protocolo de gerenciamento mais antigo e mais difundido em redes. Seu modelo é composto por três elementos: o gerente (NMS, sistema de gerência da rede), o agente (software executado no dispositivo) e a MIB (Management Information Base), uma base hierárquica de objetos que descreve o que pode ser consultado, como status de interfaces, contadores de pacotes, uso de CPU e memória. Cada objeto é identificado por um OID, um identificador numérico em árvore. </p>
+            <p> As principais operações do SNMP: </p>
+            <ul>
+                <li> <strong> Get (Gerente → Agente) :</strong> Lê o valor de um ou mais objetos da MIB, identificados pelo OID. </li>
+                <li> <strong> GetNext (Gerente → Agente) :</strong> Lê o próximo objeto da MIB, permitindo percorrer a árvore (walk). </li>
+                <li> <strong> GetBulk (Gerente → Agente) :</strong> Lê grandes blocos de dados em uma única requisição. Não tem na versão v1. </li>
+                <li> <strong> Set (Gerente → Agente) :</strong> Altera o valor de um objeto da MIB (escrita). </li>
+                <li> <strong> Response (Agente → Gerente) :</strong> Responde às operações Get, GetNext, GetBulk e Set. </li>
+                <li> <strong> Trap (Agente → Gerente) :</strong> Notificação espontânea de evento (ex.: linkDown), sem confirmação. </li>
+                <li> <strong> Inform (Agente → Gerente) :</strong> Notificação com confirmação de recebimento pelo gerente. Não tem na versão v1. </li>
+            </ul>
+            <p> O SNMP evoluiu em três versões. As versões 1 e 2c autenticam apenas por uma string de comunidade, enviada sem criptografia, o que as torna frágeis. A versão 3 introduziu autenticação de usuários, integridade e criptografia, sendo a única recomendada atualmente. O transporte é feito sobre UDP, nas portas 161 (consultas) e 162 (traps).</p>
+            <p> Sua principal aplicação é o monitoramento, por meio de polling periódico de contadores e do recebimento de traps. Embora tenha operação de escrita, ela é pouco usada para configuração, por causa da ausência de transações e do histórico de segurança fraca. Suas vantagens são a ampla compatibilidade e a leveza; suas limitações são a modelagem de dados pouco estruturada e a baixa adequação à configuração em larga escala.</p>
             <h3> NETCONF </h3>
-            <p> O NETCONF (Network Configuration Protocol) é um protocolo de gerenciamento e configuração de rede desenvolvido pelo IETF (RFC 6241). Em vez de focar no encaminhamento de pacotes em tempo real (como o OpenFlow), o NETCONF foi desenhado para configurar, gerenciar, instalar e atualizar o estado e as políticas de dispositivos de rede de forma programática. </p>
-            <p> Enquanto o Openflow é utilizada para fazer a comunicação entre o plano de controle e o plano de dados, o NETCONF é normalmente utilizado para para interligar o plano de gerenciamento e o plano operacional, ou seja, partipando da interface MP Southbound.</p>
-            <p> O NETCONF trabalha em conjunto estrito com a linguagem de modelagem YANG. Isso significa que o controlador não envia comandos arbitrários de linha de comando (CLI), mas sim estruturas de dados bem definidas (árvores hierárquicas em XML ou JSON).</p>
+            <p> O NETCONF (Network Configuration Protocol, RFC 6241) foi criado para suprir as limitações do SNMP e da CLI na configuração de dispositivos de rede. Ele segue o modelo cliente-servidor, em que o gerente (cliente) se comunica com o agente (servidor) no dispositivo, normalmente sobre SSH, na porta 830, o que garante autenticação, integridade e criptografia das mensagens. As mensagens são trocadas em XML, por meio de chamadas RPC, e a estrutura dos dados é descrita por modelos YANG, que tornam a configuração padronizada e independente de fabricante.</p>
+            <p> Diferentemente do OpenFlow, que atua na programação do encaminhamento de pacotes, o NETCONF foi projetado para configurar, instalar e atualizar o estado e as políticas dos dispositivos de forma programática. E, diferentemente do SNMP, voltado principalmente ao monitoramento, o NETCONF tem foco na configuração, embora também execute operações de leitura de estado e monitoramento.</p>
+            <p> Em SDN, o NETCONF é normalmente usado para habilitar o OpenFlow e informar o endereço do controlador aos switches. Ele também protege o acesso de gerenciamento aos dispositivos, por meio de SSH e NACM, e pode provisionar as credenciais usadas na proteção do canal de controle.</p>
+            <p> Enquanto o OpenFlow realiza a comunicação entre o plano de controle e o plano de encaminhamento (dados), o NETCONF é utilizado para a comunicação entre o plano de gerenciamento e o dispositivo, acessando o estado mantido no plano operacional. Essa comunicação ocorre na interface southbound do plano de gerenciamento (MAL).</p>
+            <p> O NETCONF trabalha em conjunto estrito com a linguagem de modelagem YANG. Isso significa que o controlador não envia comandos arbitrários de linha de comando (CLI), mas estruturas de dados bem definidas, organizadas em árvores hierárquicas e codificadas em XML (ou JSON, em extensões como o RESTCONF).</p>
+            <p> As principais operações do NETCONF: </p>
+            <ul>
+                <li> <strong> &lt;get&gt; :</strong> Lê a configuração e o estado operacional do dispositivo. </li>
+                <li> <strong> &lt;get-config&gt; :</strong> Lê somente a configuração de um datastore. </li>
+                <li> <strong> &lt;edit-config&gt; :</strong> Altera a configuração de um datastore. </li>
+                <li> <strong> &lt;copy-config&gt; :</strong> Copia um datastore inteiro para outro. </li>
+                <li> <strong> &lt;delete-config&gt; :</strong> Apaga um datastore. </li>
+                <li> <strong> &lt;lock&gt; / &lt;unlock&gt; :</strong> Bloqueia e libera um datastore para evitar alterações concorrentes. </li>
+                <li> <strong> &lt;validate&gt; :</strong> Verifica se uma configuração é válida antes de aplicá-la. </li>
+                <li> <strong> &lt;commit&gt; :</strong> Aplica a configuração candidate ao datastore running. </li>
+                <li> <strong> &lt;discard-changes&gt; :</strong> Descarta as alterações pendentes no datastore candidate. </li>
+                <li> <strong> &lt;close-session&gt; :</strong> Encerra a sessão de forma ordenada. </li>
+                <li> <strong> &lt;kill-session&gt; :</strong> Força o encerramento de outra sessão. </li>
+            </ul>
             <p> O NETCONF introduz o conceito de bases de dados de configuração distintas nos equipamentos, tais como: </p>
             <ul>
                 <li> <strong> Running: </strong> A configuração atualmente ativa no dispositivo. </li>
                 <li> <strong> Candidate: </strong> Um espaço de rascunho onde o controlador pode testar e preparar alterações antes de aplicá-las. </li>
                 <li> <strong> Startup: </strong> A configuração que será carregada quando o dispositivo for reiniciado. </li>
             </ul>
-            <p> Oferece comandos robustos e transacionais , permitindo que alterações complexas sejam aplicadas de forma atômica (tudo ou nada). </p>
-            <p> Suporta mecanismos de subscrição (Event Notifications), permitindo que o dispositivo informe ativamente ao controlador sobre falhas, alterações de estado ou alarmes. </p>
-            <p> Utiliza tipicamente o SSH (Secure Shell) garantindo autenticação, integridade e criptografia das mensagens. </p>
+            <p> Seu grande diferencial é o suporte a transações: a configuração pode ser validada, aplicada de forma atômica e revertida (rollback) em caso de erro. O NETCONF também separa a configuração do estado operacional e oferece controle de acesso por usuário e por operação (NACM).</p>
+            <p> Além disso, suporta mecanismos de subscrição (Event Notifications, RFC 5277), que permitem ao dispositivo informar ativamente falhas, mudanças de estado ou alarmes, como a alteração do estado de uma interface. </p>
+            <p> Suas limitações são o custo maior de processamento do XML e a dependência de que o equipamento tenha modelos YANG adequados, razão pela qual é menos usado para telemetria intensiva. </p>
             <h3> Northbound Interface </h3>
             <p> A interface Northbound oferece a comunicação entre os planos de controle e gerenciamento e o plano de aplicação. </p>
             <p> Diferente da interface Southbound (que possui padrões consolidados de mercado como o OpenFlow), a interface Northbound na RFC 7426 e no ecossistema SDN é predominantemente baseada em APIs e modelos de dados orientados a serviços. Os principais padrões utilizados incluem: </p>
@@ -269,12 +314,12 @@
                 <li> <strong> gRPC / Protocol Buffers: </strong> Utilizado em arquiteturas modernas de SDN de alto desempenho. O gRPC oferece comunicação bidirecional rápida baseada em HTTP/2 e serialização eficiente, sendo ideal para streaming de telemetria e controle em tempo real. </li>
             </ul>
             <h3> Open vSwitch(OVS)</h3>
-            <p> O open vSwitch é o principal switch utilizado dentro da arquitetura da SDN para redes virtuais. </p>
+            <p> O Open vSwitch é o principal switch utilizado dentro da arquitetura da SDN para redes virtuais. </p>
             <p> O Open vSwitch é um switch virtual multicamada (multilayer virtual switch) de código aberto licenciado sob a licença Apache 2.0. Ele foi projetado para operar em ambientes de virtualização (como KVM, Xen e Proxmox), permitindo gerenciar o tráfego de rede entre máquinas virtuais (VMs) e containers dentro de um mesmo host físico ou entre múltiplos hosts por meio de túneis virtuais. </p>
             <p> O OVS divide sua inteligência e processamento de pacotes em duas partes principais para otimizar o desempenho: </p>
             <ul>
                 <li> <strong> Fast Path (Caminho Rápido - Kernel Space): </strong> Onde a grande maioria dos pacotes é processada. Se o OVS encontra uma regra de fluxo (flow) já conhecida no cache do kernel (ou via DPDK em espaço de usuário), ele encaminha o pacote instantaneamente com altíssima performance. </li>
-                <li> <strong> Slow Path (Caminho Lento - User Space): </strong>Composto por daemons como o ovs-vswitchd e o ovsdb-server. Quando um pacote chega e não se encaixa em nenhuma regra existente no cache do kernel, ele é enviado para o user space. Lá, o OVS decide o que fazer (consultando suas tabelas locais ou um controlador SDN externo) e injeta uma nova regra de fluxo no fast path para que os próximos pacotes semelhantes passem direto. </li>
+                <li> <strong> Slow Path (Caminho Lento - User Space): </strong>Composto por daemons como o ovs-vswitchd. Quando um pacote chega e não se encaixa em nenhuma regra existente no cache do kernel, ele é enviado para o user space. Lá, o OVS decide o que fazer (consultando suas tabelas locais ou um controlador SDN externo) e injeta uma nova regra de fluxo no fast path para que os próximos pacotes semelhantes passem direto. </li>
             </ul>
             <p> Vantagens: </p>
             <ul> 
@@ -288,29 +333,117 @@
                 <li><strong> Consumo de Recursos: </strong> Como roda em software, o OVS consome ciclos de CPU do host físico para processar o tráfego (embora o DPDK mitigue isso, ele exige mais processamento que um switch ASIC físico dedicado).</li>
                 <li><strong> Complexidade de Diagnóstico: </strong> Depurar problemas de perda de pacotes ou latência em ambientes altamente dinâmicos com múltiplos túneis e regras de fluxo pode ser desafiador.</li>
             </ul>
-
+            <h3> OVSDB </h3>
+            <p> O OVSDB (Open vSwitch Database Management Protocol, RFC 7047) é o protocolo de gerenciamento criado para configurar e supervisionar o Open vSwitch (OVS). Ele pertence ao plano de gerenciamento e atua sobre o dispositivo pela MAL, sem participar da programação das regras de fluxo, que é função do OpenFlow.</p>
+            <p> O OVS mantém suas configurações e parte do seu estado em um banco de dados chamado ovsdb-server, que segue um esquema próprio (Open_vSwitch). O protocolo permite que um cliente, como um controlador ou um sistema de orquestração, consulte e modifique esse banco remotamente. Ele é baseado em JSON-RPC e normalmente é transportado sobre TCP (porta 6640, por convenção) ou TLS, também podendo usar socket Unix localmente.</p>
+            <p> O banco é organizado em tabelas, e as principais são: </p>
+            <ul> 
+                <li> <strong> Open_vSwitch: </strong> a tabela raiz, com a configuração global do equipamento. </li>
+                <li> <strong> Bridge: </strong> os switches virtuais (por exemplo, br0), incluindo o DPID, a versão do OpenFlow aceita e o modo de falha (fail-secure ou fail-standalone). </li>
+                <li> <strong> Port e Interface: </strong> as portas adicionadas às bridges e as interfaces associadas, com seus tipos (físicas, virtuais, túneis VXLAN/GRE), estados e estatísticas. </li>
+                <li> <strong> Controller: </strong> o endereço do controlador OpenFlow (IP, porta e transporte). </li>
+                <li> <strong> Manager: </strong> o endereço do cliente OVSDB que gerencia o banco. </li>
+                <li> <strong> QoS e Queue: </strong> limitação de taxa e filas de tráfego. </li>
+            </ul>
+            <p> Entre as principais operações do protocolo estão: </p>
+            <ul>
+                <li><strong> transact: </strong> executa um conjunto de operações no banco (inserir, consultar, atualizar e remover linhas) de forma atômica, com suporte a transações. </li>
+                <li><strong> monitor: </strong> o cliente se inscreve em tabelas ou colunas e recebe notificações sempre que há alterações, como a mudança do estado de um enlace (link_state). </li>
+                <li><strong> list_dbs, get_schema: </strong> descobrem os bancos disponíveis e seu esquema. </li>
+                <li><strong> echo: </strong> verifica se a conexão continua ativa. </li>
+                <li><strong> lock, steal, unlock: </strong> controlam o acesso exclusivo ao banco entre clientes. </li>
+            </ul>
+            <p> O OVSDB é a ferramenta típica para a configuração de base de um switch virtual: criar bridges e portas, informar o endereço do controlador, definir a versão do OpenFlow e o modo de falha. Com isso, prepara o switch para que ele estabeleça a conexão OpenFlow com o controlador, o que complementa o papel que o NETCONF exerce em equipamentos que o suportam. Por meio do monitoramento, o plano de gerenciamento também acompanha mudanças de estado, como a queda de uma interface. </p>
+            <p> No dia a dia, a configuração costuma ser feita pelo comando ovs-vsctl, que acessa o ovsdb-server. Controladores e plataformas de orquestração (como OpenStack, por meio do OVN ou do Neutron) podem usar o protocolo diretamente. </p>
+            <p> O OVSDB é específico para o ecossistema Open vSwitch e seu esquema, o que limita seu uso em equipamentos de outros fabricantes. Além disso, ele não programa regras de fluxo nem descobre a topologia, funções que pertencem ao OpenFlow e ao plano de controle. A segurança depende do uso de TLS e de controle de acesso, pois a conexão em TCP simples não oferece autenticação nem criptografia. </p>
+            <p> O OVSDB é o protocolo de gerenciamento do Open vSwitch: configura bridges, portas e controladores, e permite acompanhar mudanças de estado por meio de notificações. Ele cumpre, para os switches virtuais, o papel que o NETCONF cumpre em equipamentos de rede em geral, preparando o dispositivo para que o plano de controle assuma, via OpenFlow, a programação dinâmica do encaminhamento. </p>
+            <h3> OVN (Open Virtual Network) </h3>
+            <p> O OVN é um sistema de virtualização de redes, desenvolvido no ecossistema do Open vSwitch (OVS), que funciona como um controlador SDN para redes virtuais. Ele permite criar switches, roteadores, ACLs, NAT e balanceadores de carga lógicos, independentes da topologia física, e é usado principalmente em ambientes de nuvem (como o OpenStack) e em Kubernetes. Em termos da RFC 7426, seu conjunto de componentes forma o plano de controle, enquanto o Open vSwitch de cada host é o plano de encaminhamento. </p>
+            <p> O OVN é logicamente centralizado, mas fisicamente distribuído. Sua arquitetura é dividida em camadas: </p>
+            <ul>
+                <li><strong> CMS (Cloud Management System): </strong> sistema externo, como o Neutron do OpenStack, que expressa a intenção do usuário (“crie esta rede, este roteador, esta regra de segurança”). Corresponde ao plano de aplicação. </li>
+                <li><strong> OVN Northbound DB: </strong> banco de dados que armazena a rede lógica desejada, escrita pelo CMS. </li>
+                <li><strong> ovn-northd: </strong> processo central que traduz a rede lógica em fluxos lógicos (logical flows). </li>
+                <li><strong> OVN Southbound DB: </strong> banco de dados que guarda os fluxos lógicos e o estado físico (quais hosts existem, onde cada porta está ligada). </li>
+                <li><strong> ovn-controller: </strong> executado em cada hipervisor, lê a Southbound DB e converte os fluxos lógicos em regras OpenFlow locais, instaladas no OVS do próprio host. Também configura o OVS pelo OVSDB e informa à Southbound DB o estado físico do host. </li>
+            </ul>
+            <p> Entre hosts, o tráfego das redes lógicas é transportado por túneis de encapsulamento, como Geneve (padrão), VXLAN ou STT. Esses túneis carregam metadados que identificam a rede lógica e as portas de origem e destino. </p>
+            <p> O OVN oferece um conjunto de recursos voltado à virtualização de redes. Seus switches e roteadores lógicos são distribuídos, ou seja, implementados em todos os hosts, sem depender de um nó central de roteamento. As ACLs e os grupos de segurança são aplicados diretamente no Open vSwitch, e o sistema conta com NAT, DHCP e balanceamento de carga nativos. Para conectar as redes lógicas ao mundo físico, utiliza gateways e, quando necessário, integra-se a hardware por meio de switches físicos compatíveis com VTEP. </p>
+            <p> Para realizar essas funções, o OVN combina três protocolos principais. O OVSDB é usado para configurar e monitorar o Open vSwitch e para a comunicação com os bancos Northbound e Southbound. O OpenFlow é responsável por instalar as regras de encaminhamento no Open vSwitch local. Já o Geneve (padrão) ou o VXLAN fazem o encapsulamento do tráfego entre os hosts. </p>
+            <p> Entre as vantagens dessa arquitetura, destaca-se a escalabilidade: como o ovn-controller se comunica com o Open vSwitch localmente, não há milhares de conexões OpenFlow concentradas em um único controlador. Há também resiliência, pois os bancos de dados podem operar em cluster (Raft) e, caso o plano central fique indisponível, os fluxos já instalados continuam encaminhando o tráfego. O desempenho também é favorecido, já que o roteamento e as ACLs são distribuídos e executados no próprio host onde a máquina virtual está. Por fim, a integração é facilitada, uma vez que o OVN é o padrão no OpenStack moderno e está disponível em Kubernetes, por meio de soluções como Kube-OVN e OpenShift. </p>
+            <p> Por outro lado, o OVN possui limitações. Ele foi projetado para a virtualização de redes em nuvem e contêineres, e não para controlar redes físicas de campus ou WAN, cenários em que controladores como ONOS e OpenDaylight são mais utilizados. Além disso, depende do ecossistema Open vSwitch. Por fim, sua operação e seu diagnóstico são complexos, pois envolvem várias camadas de tradução: da rede lógica para os fluxos lógicos e destes para as regras OpenFlow. </p>
+            <h3> NOX </h3>
+            <p> O NOX foi o primeiro controlador OpenFlow e deu origem à ideia de “sistema operacional de rede” para SDN. Foi apresentado em 2008 e, depois, liberado como código aberto para a comunidade de pesquisa. </p>
+            <p> Foi desenvolvido pela Nicira Networks, empresa fundada por pesquisadores ligados a Stanford e Berkeley, em paralelo ao surgimento do OpenFlow. O artigo que o descreve, NOX: Towards an Operating System for Networks (2008), propôs que a rede tivesse uma plataforma central que oferecesse uma visão global e uma interface de programação, assim como um sistema operacional faz com o hardware de um computador. </p>
+            <p> A arquitetura do NOX foi construída em torno de um núcleo escrito em C++, sobre o qual as aplicações podiam ser desenvolvidas tanto em C++ quanto em Python, por meio de bindings. Seu funcionamento é orientado a eventos: o núcleo recebe as mensagens OpenFlow enviadas pelos switches, como Packet-In e Port-Status, converte-as em eventos e as entrega aos componentes registrados para tratá-los. Esses componentes são módulos que implementam funções como descoberta de topologia, aprendizado de hosts, roteamento, autenticação e controle de acesso. Todo o sistema roda em um processo único, que mantém a conexão OpenFlow com todos os switches e guarda a visão da rede em memória, seguindo, portanto, o modelo centralizado monolítico. O protocolo suportado era o OpenFlow 1.0. </p>
+            <p> Ao longo do tempo, o projeto deu origem a diferentes versões. O NOX clássico, o original, combinava C++ e Python. Posteriormente, surgiu o chamado “novo” NOX, uma reescrita mais enxuta, feita apenas em C++ e voltada ao desempenho. Já o POX, criado depois, é a versão em Python puro, voltada ao ensino e à prototipagem. </p>
+            <p> A importância do NOX é principalmente histórica e conceitual. Ele serviu de referência para os controladores seguintes, como POX e Ryu, e consolidou o conceito de plano de controle logicamente centralizado, que mais tarde seria formalizado pela RFC 7426. Além disso, demonstrou na prática que um software centralizado pode controlar o encaminhamento de uma rede inteira. </p>
+            <p> Por outro lado, o NOX apresenta limitações importantes. Por rodar em um único processo, tem escalabilidade e desempenho restritos. Também não oferece alta disponibilidade nativa, de modo que a queda do controlador deixa a rede sem plano de controle. Soma-se a isso o suporte exclusivo ao OpenFlow 1.0 e o fato de o projeto estar descontinuado, o que faz com que hoje tenha interesse principalmente histórico. </p>
         </section>
 
         <!-- 5. Funcionamento -->
         <section id="funcionamento">
             <h2>5. Funcionamento</h2>
-            <h3> Construção da topologia </h3>
-            <p> O processo de construção da topologia e das tabelas de fluxo ocorre da seguinte maneira: </p>
+            <h3>Conexão entre Switch e Controlador</h3>
+                <div style="display: flex; justify-content: center; align-items: center; padding: 10px 0;">
+                    <figure style="margin: 0; width: 100%; max-width: 500px; text-align: center;">
+                        <img src="comunication_openflow.jpg" style="width: 100%; height: 600px; display: block; border-radius: 8px;" alt="Arquitetura recomendada pela rfc">
+                        <figcaption style="font-size: 14px; color: #666; margin-top: 8px; font-style: italic;">
+                            Imagem retirada de https://ipcisco.com/lesson/open-flow-messages/
+                        </figcaption>
+                    </figure>
+                </div>
+            <p> Inicialmente, o switch recebe o endereço IP (ou o nome de host) e a porta do controlador, configurados via CLI, OVSDB ou pelo protocolo de gerenciamento NETCONF. Com essas informações, o switch abre uma conexão TCP ou TLS com o controlador. A partir daí, toda a comunicação de controle entre os dois passa a ocorrer por meio do protocolo OpenFlow.</p>
+            <p> Switch e controlador trocam mensagens do tipo Hello para negociar a versão do OpenFlow que será utilizada. Definida a versão, o controlador envia uma mensagem Features Request para solicitar as capacidades básicas do switch, como o número de tabelas de fluxo e o identificador do equipamento na rede (DPID, Datapath ID). O DPID tem 64 bits e, por convenção, os 48 bits inferiores costumam corresponder ao endereço MAC do switch. O switch responde com os dados solicitados por meio da mensagem Features Reply. Na versão 1.0 essa resposta já inclui as portas; a partir da versão 1.3, as portas, suas velocidades e seus estados são obtidos por uma mensagem separada de descrição de portas (OFPMP_PORT_DESC).</p>
+            <p> Após, o controlador envia uma mensagem Set Config para definir parâmetros do switch, como o tamanho máximo do pacote enviado em um Packet-In, e utiliza mensagens Stats Request/Reply (Multipart no OpenFlow 1.3) para obter descrição (fabricante, modelo, software, serial), estatísticas de fluxos, de tabelas, de portas e de filas.</p>
+            <p> Em seguida, switch e controlador passam a trocar mensagens Echo periodicamente. Elas verificam se a conexão de controle continua ativa e, portanto, permitem detectar a queda do switch, do controlador ou do canal entre eles.</p>
+
+            <h3>Construção da Topologia</h3>
+            <p> O controlador cria quadros LLDP (Link Layer Discovery Protocol), que carregam o DPID e o número da porta de origem, e os encapsula em mensagens OpenFlow do tipo Packet-Out. Cada mensagem é enviada ao switch com a instrução de transmitir o quadro por uma porta específica, de modo que o LLDP chegue aos vizinhos diretamente conectados.</p>
+            <p> Ao receber o quadro, o switch vizinho consulta sua tabela de fluxos. Como o LLDP não deve ser encaminhado como tráfego comum, uma regra (pré-instalada pelo controlador ou a própria regra table-miss) determina o envio do pacote ao controlador por meio de uma mensagem Packet-In. O controlador então combina duas informações: o conteúdo do LLDP (DPID e porta de origem) e os metadados do Packet-In (DPID do switch receptor e porta de entrada). Com isso, ele identifica a existência de um enlace entre os dois switches e o registra. Esse processo se repete periodicamente, o que mantém a topologia atualizada.</p>
+            <p> O controlador mantém em memória um grafo G = (V, E), em que V representa os switches e E representa os enlaces entre eles, que podem ter pesos como latência, taxa de perda de pacotes ou capacidade. Quando chega uma nova requisição de fluxo, o controlador executa algoritmos como Dijkstra (menor caminho ou menor latência) ou CSPF (Constrained Shortest Path First), que considera restrições de largura de banda e de QoS.</p>
+            <p> Por fim, o controlador envia as regras calculadas aos switches envolvidos por meio do próprio OpenFlow, usando mensagens Flow-Mod, que instalam as entradas nas tabelas de fluxo.</p>
+            
+            <h3> Quando um pacote chega a um switch </h3>
+            <p> Quando um pacote chega a um switch ele verifica se alguma das regras instaladas na Flow Table casa com o pacote em questão, caso haja mais de uma regra com prioridades diferentes ele escolhe a com maior prioridade, em cima disso temos dois cenários possíveis:</p>
             <ul>
-                <li> <strong> Descoberta de Topologia: </strong> O controlador descobre a topologia enviando pacotes especiais (como o LLDP - Link Layer Discovery Protocol) por meio dos comutadores para mapear exatamente como cada porta está conectada. </li>
-                <li> <strong> Representação em Grafo:  </strong> O controlador constrói um grafo G=(V,E) em memória, onde V são os comutadores e E são os links entre eles (com pesos como latência, perda de pacote ou capacidade do link). </li>
-                <li> <strong> Cálculo da Rota: </strong> Quando chega uma nova requisição de fluxo, o controlador executa algoritmos como Dijkstra (para menor caminho/latência) ou Constrained Shortest Path First (CSPF) para considerar restrições de largura de banda e QoS. </li>
-                <li> <strong> Instalação das Regras: </strong> O controlador envia as regras calculadas para as tabelas de fluxo dos switches envolvidos via protocolo Southbound (ex.: OpenFlow). </li>
+                <li><strong> Acerto (hit): </strong> o switch executa as instruções/ações (encaminhar, descartar, modificar cabeçalho, enviar a uma tabela de grupo ou de medidores, ir para a próxima tabela) e atualiza os contadores. O pacote segue sem envolver o controlador. </li>
+                <li><strong> Falha (miss): </strong> vale a entrada table-miss, que normalmente significa enviar ao controlador, no entanto pode descartar ou ir para outra tabela, caso haja múltiplas tabelas. No OpenFlow 1.0, o comportamento padrão do miss é enviar ao controlador; a partir da 1.3, a entrada table-miss precisa ser instalada explicitamente, e sem ela o pacote é descartado.</li>
             </ul>
+            <p> Se o pacote for enviado ao controlador, o switch o encapsula em uma mensagem Packet-In, que pode conter o pacote inteiro ou apenas os cabeçalhos (neste caso, o restante fica em um buffer local do switch, identificado por um buffer_id). O controlador calcula o caminho, envia Flow-Mod aos switches envolvidos e, em seguida, libera o pacote pendente: se ele estiver bufferizado no switch, a liberação pode ser feita no próprio Flow-Mod (referenciando o buffer_id); caso contrário, é feita por meio de um Packet-Out. Os pacotes seguintes do fluxo já casam com as regras instaladas.</p>
+
+            <h3> Construção das tabelas de fluxo </h3>
+            <p> Uma entrada de fluxo tem os seguintes campos: match fields, prioridade, contadores, instruções, timeouts (idle/hard), cookie e flags.</p>
+            <p> Para a instalação dessas entradas/regras existem três modos: </p>
+            <ul>
+                <li><strong> Reativo: </strong> a regra só é instalada quando o primeiro pacote chega (PACKET_IN → FLOW_MOD). Usa pouca tabela, mas tem latência no primeiro pacote e sobrecarrega o controlador. </li>
+                <li><strong> Proativo: </strong> o controlador instala as regras antes do tráfego, com base na topologia e na política. Dá latência baixa, mas exige mais entradas. </li>
+                <li><strong> Híbrido: </strong> regras básicas proativas e o restante reativo. </li>
+            </ul>
+            <p> As entradas expiram por idle timeout (sem tráfego) ou hard timeout. O switch pode avisar com FLOW_REMOVED. Os contadores são lidos periodicamente (STATS_REQUEST), alimentando monitoramento e engenharia de tráfego. Também existem tabelas de grupo (multicast, balanceamento, fast-failover) e tabelas de medidores (QoS/rate limiting).</p>
+
+            <h3> Detecção de queda de enlace </h3>
+            <p> O switch detecta a queda de um enlace por meio do plano operacional (por exemplo, a perda de sinal na porta) e envia uma mensagem Port-Status ao controlador. O controlador também pode perceber a queda de forma indireta, pela ausência dos quadros LLDP daquele enlace durante um período de timeout. Além de notificar o controlador via Port-Status, o dispositivo pode informar o plano de gerenciamento sobre a queda do enlace por meio de notificações NETCONF, traps SNMP ou atualizações do OVSDB. Essas notificações servem a monitoramento, alarmes e registro histórico, enquanto a reação da rede à falha (recálculo de rotas) é conduzida pelo plano de controle.</p>
+            <p> Se os switches tiverem caminhos alternativos pré-instalados (por exemplo, por meio de Fast Failover Groups), eles mudam sozinhos para o caminho de backup, sem consultar o controlador, e a recuperação ocorre na casa de dezenas de milissegundos. Em paralelo, o controlador remove o enlace da topologia e identifica os fluxos que o utilizavam. Quando não há caminho de backup, ele recalcula as rotas e envia novas mensagens Flow-Mod aos switches afetados. </p>
+
+            <h3> Detecção de queda de roteador </h3>
+            <p> O controlador percebe a queda quando a conexão de controle é encerrada (TCP finalizado) ou quando ocorre timeout das mensagens Echo. Os switches vizinhos também reportam, por meio de Port-Status, a queda das portas voltadas para o equipamento.</p>
+            <p> O controlador remove o nó e todos os seus enlaces da topologia e recalcula e reinstala as rotas afetadas. Quando o equipamento volta, ele refaz a conexão TCP, é redescoberto e reprogramado (o plano de gerenciamento pode reaplicar a configuração)</p>
+
+            <h3> Detecção de queda do Controlador </h3>
+            <p> o switch detecta por TCP encerrado ou timeout de Echo.Com isso, switches entram em modo fail-secure (mantêm as regras existentes, sem novas) ou fail-standalone (voltam a operar como switch L2 tradicional). </p>
+            <p> A mitigação é usar múltiplos controladores (papéis master/slave/equal do OpenFlow) e clusters distribuídos (ONOS, ODL). </p>
+
             <h3> Prevenção de Loops </h3>
             <p> Uma problemática importante em redes tradicionais é como podemos prevenir loops. O RIP não consegue evitar por completo loops e o OSPF só evita por completo loops se todos os roteadores tiverem a mesma topologia da rede.</p>
             <p> Em SDN, o problema dos loops é mitigado de forma diferente graças à centralização e à lógica programável:</p>
             <p> Como o controlador possui o grafo completo da rede, ele calcula caminhos acíclicos ponta a ponta antes de enviar as regras para os switches. Ele simplesmente não instala rotas que formem ciclos fechados para o mesmo fluxo de dados.</p>
             <p> No entanto, ainda há risco de haver loops na SDN, O maior risco de loops em SDN acontece durante atualizações dinâmicas de rotas (quando o controlador tenta reencaminhar um fluxo e atualiza alguns switches antes de outros, criando temporariamente um loop de convergência). Para evitar isso, utilizam-se duas estratégias principais </p>
             <ul>
-                <li> <strong> Atualizações em Duas Fases (Two-Phase Commit): </strong> O controlador grava as novas regras nos switches ao longo do novo caminho com um tag/VLAN diferente. Apenas quando todos os switches intermediários possuem a nova regra, o controlador atualiza o switch de entrada (ingress switch) para começar a etiquetar os pacotes com a nova rota. </li>
-                <li> <strong> Regras Baseadas em Match Inequívoco: </strong> Cada entrada na Flow Table possui campos rígidos de correspondência (Match fields como IP de origem, IP de destino, porta TCP, etc.). O pacote só toma um único caminho pré-determinado, impedindo que circule indefinidamente. </li>
+                <li> <strong> Atualizações em Duas Fases (Two-Phase Update): </strong> O controlador grava as novas regras nos switches ao longo do novo caminho com um tag/VLAN diferente. Apenas quando todos os switches intermediários possuem a nova regra, o controlador atualiza o switch de entrada (ingress switch) para começar a etiquetar os pacotes com a nova rota. </li>
+                <li> <strong> Decremento do TTL: </strong> A proteção real para evitar que o pacote fique indefinidamente na rede é o decremento do TTL (Time to live) do datagrama.</li>
             </ul>
+            <p> Os loops também podem surgir do tráfego de broadcast e multicast, como o ARP. Esses quadros não têm um destino único, e por isso o controlador não calcula um caminho ponta a ponta para eles. Se fossem inundados (flooding) por todas as portas em uma topologia com ciclos, os switches os reencaminhariam indefinidamente, gerando uma tempestade de broadcast. Para evitar isso, o controlador pode inundar apenas pelas portas pertencentes a uma árvore geradora (spanning tree) da topologia, que ele calcula a partir do grafo da rede, bloqueando as portas redundantes. Outra solução é reduzir o broadcast na origem: o controlador atua como proxy ARP, respondendo diretamente às requisições de hosts já conhecidos, de modo que o quadro nem chega a circular pela rede. Em ambos os casos, o controlador usa a visão global para impor uma estrutura sem ciclos ao tráfego que não segue um caminho único.</p>
         </section>
 
         <!-- 6. Desafios e Mitigações -->
@@ -363,8 +496,7 @@
                 <li> Verificação formal de regras antes (ou logo depois) de instalá-las, com ferramentas de pesquisa como o VeriFlow, o Header Space Analysis e o NetPlumber, que detectam loops, buracos negros e violações de isolamento. </li>
                 <li> Abordagem baseada em intenção (Intents): o operador declara "o quê" (ex.: conectividade entre A e B com 1 Gbps) e o controlador traduz isso para regras e as reconcilia automaticamente. </li>
             </ul>
-        
-            <!-- NOVO -->
+
             <h3>Migração, Interoperabilidade e Capacitação</h3>
             <p><strong>Desafio:</strong> Poucas organizações podem trocar toda a rede de uma vez (cenário brownfield). Além disso, o OpenFlow não é suportado de forma idêntica por todos os fabricantes e a Northbound API não possui um padrão único, o que gera risco de dependência de fornecedor (vendor lock-in). Há ainda a barreira humana: equipes acostumadas com a CLI precisam aprender APIs, Python/REST, YANG e práticas de DevOps.</p>
             <p><strong>Mitigação:</strong></p>
@@ -413,7 +545,6 @@
             <h3>SDN x NFV</h3>
             <p>Enquanto o <strong>SDN</strong> separa o controle do encaminhamento para centralizar a inteligência, a <strong>NFV (Network Functions Virtualization)</strong> foca em virtualizar as funções de rede (como roteadores, firewalls e NATs), rodando-as em software sobre hardware genérico. São tecnologias complementares.</p>
             
-            <!-- Tabela Comparativa SDN x NFV -->
             <div class="tabela-wrap">
                 <table class="tabela">
                     <thead>
