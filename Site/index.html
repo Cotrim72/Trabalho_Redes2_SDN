@@ -104,9 +104,38 @@
             margin-bottom: 15px;
         }
 
-        .faq-item h4 {
+        .faq-item h4, h4 {
             color: #0f172a;
-            margin-bottom: 5px;
+            margin-top: 12px;
+            margin-bottom: 6px;
+        }
+
+        .tabela-wrap {
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .tabela {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+
+        .tabela th, .tabela td {
+            border: 1px solid #cbd5e1;
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .tabela th {
+            background-color: #eff6ff;
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+
+        .tabela tbody tr:nth-child(even) {
+            background-color: #f8fafc;
         }
 
         footer {
@@ -147,23 +176,90 @@
         <section id="introducao">
             <h2>1. Introdução</h2>
             <h3>Definição</h3>
-            <p><strong>Software-Defined Networking (SDN)</strong>, ou Redes Definidas por Software, é uma abordagem para arquitetura de rede onde o controle da rede é separado do hardware físico subjacente e centralizado em um elemento lógico chamado controlador.</p>
+            <p>Software-Defined Networking (SDN), ou Redes Definidas por Software, é um paradigma de arquitetura de redes de computadores no qual o plano de controle (a inteligência responsável por decidir como e por onde o tráfego deve ser roteado) é desacoplado do plano de encaminhamento ou de dados (os dispositivos que efetivamente comutam e encaminham os pacotes) e consolidado em uma plataforma de software logicamente centralizada, denominada Controlador SDN ou Sistema Operacional de Rede (<em>Network Operating System</em> — NOS).</p>
+            <p>De acordo com a literatura clássica da área (KREUTZ et al., 2015; KUROSE; ROSS, 2021; RFC 7426), uma arquitetura SDN caracteriza-se por quatro pilares fundamentais:</p>
+            <ul>
+                <li><strong>Desacoplamento entre os planos de controle e de dados:</strong> a lógica de controle complexa é removida dos switches e roteadores físicos, que passam a atuar exclusivamente como dispositivos ágeis de encaminhamento de pacotes controlados remotamente.</li>
+                <li><strong>Decisões de encaminhamento baseadas em fluxos (<em>Flow-based forwarding</em>):</strong> diferentemente das redes tradicionais, em que o encaminhamento baseia-se estritamente no endereço IP ou MAC de destino, na SDN o encaminhamento é generalizado segundo o modelo <em>Match-Action</em> (correspondência e ação). Um fluxo é definido por um conjunto flexível de campos do cabeçalho do pacote (camadas de enlace, rede e transporte), aos quais se associam regras de encaminhamento, descarte, modificação de cabeçalho ou tratamento de qualidade de serviço (QoS).</li>
+                <li><strong>Lógica de controle externalizada (Controlador SDN / NOS):</strong> o controle da rede é transferido para uma entidade de software externa que mantém uma visão global e atualizada de toda a topologia da rede, fornecendo abstrações de alto nível sobre os recursos físicos subjacentes.</li>
+                <li><strong>Programabilidade da rede:</strong> a rede passa a ser diretamente programável por aplicações de software que executam sobre o controlador (como engenharia de tráfego, balanceamento de carga, firewalls dinâmicos e virtualização de rede), permitindo automatizar políticas de ponta a ponta sem reconfigurar manualmente cada equipamento.</li>
+            </ul>
             
-            <h3>Como surgiu?</h3>
-            <p>O conceito de SDN surgiu de pesquisas acadêmicas na Universidade de Stanford e na UC Berkeley por volta de 2008 (com o projeto Ethane e o protocolo OpenFlow). A motivação principal foi a necessidade de simplificar o gerenciamento de rede e permitir a inovação e o dinamismo que os data centers e a computação em nuvem exigiam, algo impossível de alcançar com as redes tradicionais rígidas.</p>
+            <h3>Como surgiu? (Contexto Histórico e Evolução)</h3>
+            <p>O surgimento da SDN foi motivado pelo fenômeno conhecido na literatura como "ossificação das redes". Ao longo das décadas de 1990 e 2000, o crescimento exponencial da Internet, a popularização da virtualização de servidores e a ascensão dos grandes <em>data centers</em> e da computação em nuvem revelaram um forte compasso de espera na infraestrutura de comunicação: enquanto servidores virtuais podiam ser instanciados e migrados em segundos via software, a rede subjacente continuava dependente de caixas fechadas, protocolos distribuídos lentos para convergir e configurações manuais dispositivo por dispositivo (RFC 7149).</p>
+            <p>Embora o termo <em>Software-Defined Networking</em> tenha sido cunhado por volta de 2009, a evolução histórica que levou à SDN moderna atravessou três grandes fases:</p>
+            <ul>
+                <li><strong>Precursores de comutação por fluxos e separação de controle (Anos 1990):</strong> as primeiras iniciativas para separar o controle do hardware de comutação e encaminhar tráfego com base em fluxos surgiram ainda na década de 1990. Destacam-se protocolos pioneiros desenvolvidos pela Ipsilon Networks, como o IFMP (<em>Ipsilon Flow Management Protocol</em>, padronizado na RFC 1953 em 1996), que introduziu a associação dinâmica de fluxos IP a rótulos de comutação rápida, e o GSMP (<em>General Switch Management Protocol</em>, RFC 2297, 1998), um protocolo assimétrico que já permitia a um controlador externo gerenciar portas, conexões, tabelas e estatísticas de um comutador de hardware. Nessa mesma época, pesquisas em <em>Active Networking</em> propuseram tornar os nós da rede programáveis, lançando as bases conceituais da programabilidade em rede.</li>
+                <li><strong>Separação explícita entre Plano de Controle e Plano de Dados (2001–2007):</strong> no início dos anos 2000, grupos do IETF e pesquisadores acadêmicos buscaram desacoplar formalmente a lógica de roteamento do hardware de encaminhamento. Surgiram o grupo de trabalho ForCES (<em>Forwarding and Control Element Separation</em>), a plataforma RCP (<em>Routing Control Platform</em>) e a Arquitetura 4D (2005), que defendiam substituir a complexidade dos protocolos distribuídos por um plano de decisão logicamente centralizado. Em 2006 e 2007, pesquisadores da Universidade de Stanford e da UC Berkeley (liderados por Martin Casado, Nick McKeown e Scott Shenker) desenvolveram os projetos SANE e Ethane. O Ethane demonstrou na prática como gerenciar toda a segurança e o controle de acesso de uma rede corporativa utilizando um controlador central que instalava regras de fluxo diretamente em switches simples.</li>
+                <li><strong>OpenFlow (2008), Controladores SDN e Padronização Industrial (2011–presente):</strong> a partir da experiência com o Ethane, Nick McKeown e colaboradores publicaram em 2008 o artigo seminal do OpenFlow, propondo uma interface aberta para que pesquisadores e operadores programassem as tabelas de fluxo existentes nos chips (TCAM) de switches comerciais sem que os fabricantes precisassem abrir o código proprietário de seu hardware. Em paralelo, surgiram os primeiros controladores OpenFlow, como o NOX (2008) e o Beacon (ERICKSON, 2013). Em 2011, empresas de tecnologia e telecomunicações (como Google, Microsoft, Facebook, Deutsche Telekom, Verizon e Yahoo!) fundaram a Open Networking Foundation (ONF) para padronizar o OpenFlow e impulsionar a adoção comercial da SDN — consolidada mundialmente quando o Google revelou a migração de sua rede global entre <em>data centers</em> (B4) para SDN. Nos anos seguintes, o IETF formalizou a visão de provedores de serviços (RFC 7149, 2014) e padronizou a arquitetura de camadas e terminologia da SDN (RFC 7426, 2015).</li>
+            </ul>
         </section>
 
         <!-- 2. Fundamentação Teórica -->
         <section id="fundamentacao">
             <h2>2. Fundamentação Teórica</h2>
-            <h3>Rede Tradicional x SDN</h3>
+            <h3>Os Planos de Rede: Controle vs. Encaminhamento</h3>
+            <p>Para compreender a ruptura teórica proposta pela SDN, é fundamental distinguir as duas funções essenciais da camada de rede (KUROSE; ROSS, 2021):</p>
             <ul>
-                <li><strong>Rede Tradicional:</strong> O plano de controle (tomada de decisão) e o plano de encaminhamento (envio de pacotes) estão acoplados dentro do próprio dispositivo de hardware (switches/roteadores). O gerenciamento é descentralizado e feito dispositivo por dispositivo.</li>
-                <li><strong>SDN:</strong> Separa o plano de controle do plano de encaminhamento. O controle é centralizado em um software (controlador SDN), permitindo a programação da rede de forma dinâmica e automatizada.</li>
+                <li><strong>Plano de Dados (ou Plano de Encaminhamento — <em>Forwarding Plane</em>):</strong> refere-se à função local, executada diretamente no hardware de cada roteador ou comutador, que transfere um pacote recebido em uma interface de entrada para a interface de saída apropriada. Opera em escala de tempo curtíssima (nanosegundos) utilizando memória de hardware de alta velocidade (como SRAM e TCAM).</li>
+                <li><strong>Plano de Controle (<em>Control Plane</em>):</strong> refere-se à lógica de abrangência global da rede que coordena como os datagramas são roteados ponta a ponta, desde o host de origem até o host de destino, determinando o conteúdo das tabelas que o plano de dados consulta. Opera em escala de tempo maior (milissegundos a segundos) em software.</li>
             </ul>
 
-            <h3>Desafios</h3>
-            <p>Transicionar de um modelo tradicional para SDN envolve quebra de paradigmas organizacionais, necessidade de requalificação de equipes, custos de migração, garantia de interoperabilidade entre equipamentos legados e novos sistemas, além de preocupações com a segurança da centralização do controle.</p>
+            <h3>Rede Tradicional x SDN</h3>
+            <p>A diferença estrutural entre as redes tradicionais e as redes definidas por software reside em onde o plano de controle é executado e como ele interage com o plano de encaminhamento:</p>
+            <ul>
+                <li><strong>Rede Tradicional (Integração Vertical e Controle Distribuído):</strong> cada roteador ou switch é um sistema fechado e verticalmente integrado que embarca, dentro do mesmo chassi físico, o hardware de encaminhamento, o sistema operacional proprietário e os algoritmos de controle. Os roteadores executam protocolos distribuídos autônomos (como OSPF, IS-IS e BGP), trocando mensagens constantemente com vizinhos para calcular de forma individual suas tabelas de roteamento (RIB) e encaminhamento (FIB). Como cada equipamento enxerga apenas sua vizinhança ou convergem de modo assíncrono, o encaminhamento fica restrito quase exclusivamente ao prefixo IP de destino (<em>destination-based forwarding</em>).</li>
+                <li><strong>SDN (Desagregação Horizontal e Controle Logicamente Centralizado):</strong> o plano de controle é desacoplado dos dispositivos físicos e transferido para o Controlador SDN. Os comutadores tornam-se elementos de encaminhamento puro que expõem uma interface aberta (como o protocolo OpenFlow) para receber instruções do controlador. Como o controlador detém uma visão global da topologia na forma de um grafo da rede, ele calcula rotas e políticas de forma centralizada e instala entradas nas Tabelas de Fluxo (<em>Flow Tables</em>) dos switches. Isso viabiliza o encaminhamento generalizado (<em>Match-plus-Action</em>), no qual um único tipo de comutador pode se comportar simultaneamente como roteador L3, switch L2, firewall, NAT ou balanceador de carga apenas alterando as regras instaladas via software.</li>
+            </ul>
+
+            <div class="tabela-wrap">
+                <table class="tabela">
+                    <thead>
+                        <tr>
+                            <th>Critério Comparativo</th>
+                            <th>Rede Tradicional</th>
+                            <th>Rede Definida por Software (SDN)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Arquitetura dos Planos</strong></td>
+                            <td>Plano de controle e plano de dados fortemente acoplados no mesmo equipamento físico.</td>
+                            <td>Plano de controle desacoplado do hardware e separado do plano de encaminhamento.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Paradigma de Controle</strong></td>
+                            <td>Distribuído; cada nó executa algoritmos autônomos (OSPF, BGP, STP) para convergir.</td>
+                            <td>Logicamente centralizado em um controlador de software (pode ser fisicamente distribuído em cluster).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Visão da Topologia</strong></td>
+                            <td>Local ou parcial; reconstruída individualmente por cada roteador via troca de mensagens.</td>
+                            <td>Global e unificada; o controlador mantém o grafo completo da rede em tempo real.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mecanismo de Encaminhamento</strong></td>
+                            <td>Baseado em destino (<em>Destination-based</em>: consulta à tabela FIB por prefixo IP ou tabela MAC).</td>
+                            <td>Baseado em fluxos generalizados (<em>Match-Action</em> em múltiplos campos L2/L3/L4 nas <em>Flow Tables</em>).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Configuração e Gerência</strong></td>
+                            <td>Manual ou via scripts caixa a caixa (CLI proprietária), sujeita a inconsistências e erros humanos.</td>
+                            <td>Programável e automatizada via APIs (Northbound/Southbound), aplicando políticas de alto nível.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Modelo de Ecossistema</strong></td>
+                            <td>Verticalmente integrado e fechado (<em>vendor lock-in</em> de hardware + sistema operacional).</td>
+                            <td>Horizontal e aberto; interfaces padronizadas permitem interoperabilidade entre fabricantes.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ciclo de Inovação</strong></td>
+                            <td>Lento; depende de padronização de protocolos distribuídos e atualização de hardware/firmware.</td>
+                            <td>Rápido; novas funções e algoritmos são implantados como aplicações de software no controlador.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
 
         <!-- 3. Arquitetura -->
@@ -618,11 +714,11 @@
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 1953</b>: GZIP file format specification version 4.3. Disponível em: &lt;https://www.rfc-editor.org/info/rfc1953&gt;. Acesso em: 19 out. 2026.
+                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 1953</b>: Ipsilon Flow Management Protocol Specification for IPv4 Version 1.0. Disponível em: &lt;https://www.rfc-editor.org/info/rfc1953&gt;. Acesso em: 19 out. 2026.
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 2297</b>: Remote Managed Client-Initiated Transfer Protocol. Disponível em: &lt;https://www.rfc-editor.org/info/rfc2297&gt;. Acesso em: 19 out. 2026.
+                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 2297</b>: Ipsilon's General Switch Management Protocol Specification Version 2.0. Disponível em: &lt;https://www.rfc-editor.org/info/rfc2297&gt;. Acesso em: 19 out. 2026.
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
