@@ -279,8 +279,12 @@
                     </figcaption>
                 </figure>
             </div>
+            <ul>
+                <li> <strong> Camada de Aplicação: </strong>É a camada superior onde residem os softwares de gerenciamento, serviços de rede, políticas de segurança, balanceamento de carga e ferramentas de monitoramento. Ela traduz as necessidades e intenções de negócio dos administradores em políticas e regras de rede lógicas. Além de consumir a abstração da infraestrutura oferecida pelo controlador sem precisar se preocupar com os detalhes físicos dos equipamentos. </li>
+                <li> <strong> Camada de Controle: </strong>Representada pelo SDN Controller, centraliza a inteligência da rede. Ela recebe as diretrizes da camada de aplicação, processa a topologia global da rede e calcula rotas ou regras de encaminhamento. Em seguida, traduz essas decisões e as injeta programaticamente nos dispositivos de infraestrutura.</li>
+                <li> <strong> Camada de Dados: </strong>Composta pelos dispositivos físicos ou virtuais de rede, como Switches e roteadores programáveis (que conectam os servidores e nós finais). Ela executa o trabalho "pesado" e de altíssima velocidade: encaminhar pacotes de dados de uma porta para outra com base estritamente nas tabelas de fluxo que recebeu do controlador. Eles perderam a inteligência de decisão de rota autônoma e agora agem de forma reativa e obediente às regras instaladas via software.</li>
+            </ul>
             <p> Esse modelo evidencia o princípio central da SDN: a separação física e lógica entre os planos de controle e de dados. Nela, o controlador SDN (SDN Controller) assume a inteligência e as decisões de encaminhamento, enquanto os switches operam exclusivamente no plano de dados. </p>
-            <p> O controlador mantém uma visão lógica centralizada de toda a topologia da rede, o que simplifica o encaminhamento, o cálculo de rotas e a deteção de falhas. </p>
             <p> Ao contrário das redes tradicionais, cujos switches e roteadores realizam o encaminhamento com base em prefixos IP de destino, os dispositivos em redes SDN utilizam tabelas de fluxo (flow tables), permitindo decisões de encaminhamento refinadas e programáveis baseadas em múltiplos campos do cabeçalho (Match-Action).</p>
             <p> Os switches deixam de tomar decisões complexas de roteamento autonomamente. Eles limitam-se a consultar as suas tabelas de fluxo (flow tables) e executar as ações instruídas pelo controlador (por exemplo: encaminhar pela porta X, descartar pacote, alterar cabeçalho). </p>
 
@@ -326,15 +330,24 @@
             <h3> MAL — Management Abstraction Layer (Camada de Abstração de Gerenciamento) </h3>
             <p> É a camada que abstrai os recursos do dispositivo para o plano de gerenciamento. Por meio dela, o gerenciamento provisiona, configura e supervisiona o equipamento, acessando tanto sua configuração quanto o estado mantido no plano operacional. Corresponde à interface southbound do plano de gerenciamento, e é nela que atuam protocolos como o NETCONF, o OVSDB e o SNMP. </p>
 
+            <h3> CP e MP Southbound Interfaces (Interfaces Sul)</h3>
+            <p> As interfaces Southbound conectam o Plano de Controle (CP) e o Plano de Gerenciamento (MP) aos dispositivos do plano de dados. Exemplos incluem o OpenFlow, NETCONF, SNMP e OVSDB.</p>
+
+            <h3> Northbound Interface </h3>
+            <p> A interface Northbound oferece a comunicação entre os planos de controle e gerenciamento e o plano de aplicação. </p>
+            <p> Diferente da interface Southbound (que possui padrões consolidados de mercado como o OpenFlow), a interface Northbound na RFC 7426 e no ecossistema SDN é predominantemente baseada em APIs e modelos de dados orientados a serviços. Os principais padrões utilizados incluem: </p>
+            <ul>
+                <li> <strong> REST / RESTful APIs (HTTP): </strong> O padrão mais difundido na indústria para a interface Northbound. Permite que as aplicações comuniquem com o controlador SDN utilizando requisições HTTP (GET, POST, PUT, DELETE) e payloads em JSON ou XML. </li>
+                <li> <strong> gRPC / Protocol Buffers: </strong> Utilizado em arquiteturas modernas de SDN de alto desempenho. O gRPC oferece comunicação bidirecional rápida baseada em HTTP/2 e serialização eficiente, sendo ideal para streaming de telemetria e controle em tempo real. </li>
+            </ul>
         </section>
 
         <!-- 4. Protocolos e Tecnologias -->
         <section id="protocolos">
             <h2>4. Protocolos e Tecnologias da SDN</h2>
-            <h3> CP e MP Southbound Interfaces (Interfaces Sul)</h3>
-            <p> As interfaces Southbound conectam o Plano de Controle (CP) e o Plano de Gerenciamento (MP) aos dispositivos do plano de dados. Exemplos incluem o OpenFlow, NETCONF, SNMP e OVSDB.</p>
             <h3>OpenFlow</h3>
             <p> O OpenFlow é o primeiro e mais amplamente adotado protocolo padronizado de comunicação em SDN, ele atua na interface CP Southbound. Ele permite que o controlador comande diretamente as tabelas de fluxo dos switches do plano de dados.</p>
+            <p> O OpenFlow não possui uma RFC própria oficial publicada pelo IETF (Internet Engineering Task Force), pois ele não é um padrão do IETF. Na verdade, o OpenFlow é uma especificação aberta desenvolvida por professores da Universidade de Stanford e da Universidade da Califórnia em Berkeley e mantida pela ONF (Open Networking Foundation), um consórcio da indústria fundado em 2011 por empresas como Google, Facebook, Microsoft, Yahoo, Deutsche Telekom e Verizon.</p>
             <p> O protocolo opera através de um Canal Seguro, por meior de uma conexão TCP/TLS, estabelecido entre o Controlador SDN e os comutadores OpenFlow, utilizando principalmente os seguintes mecanismos: </p>
             <ul> 
                 <li> <strong> Tabelas de Fluxo (Flow Tables): </strong> O OpenFlow define que o encaminhamento de pacotes não é mais baseado apenas em endereços IP tradicionais ou portas VLAN fixas, mas sim em regras de fluxo compostas por correspondências (match fields), contadores e ações. </li>
@@ -374,7 +387,7 @@
             <p> O SNMP evoluiu em três versões. As versões 1 e 2c autenticam apenas por uma string de comunidade, enviada sem criptografia, o que as torna frágeis. A versão 3 introduziu autenticação de usuários, integridade e criptografia, sendo a única recomendada atualmente. O transporte é feito sobre UDP, nas portas 161 (consultas) e 162 (traps).</p>
             <p> Sua principal aplicação é o monitoramento, por meio de polling periódico de contadores e do recebimento de traps. Embora tenha operação de escrita, ela é pouco usada para configuração, por causa da ausência de transações e do histórico de segurança fraca. Suas vantagens são a ampla compatibilidade e a leveza; suas limitações são a modelagem de dados pouco estruturada e a baixa adequação à configuração em larga escala.</p>
             <h3> NETCONF </h3>
-            <p> O NETCONF (Network Configuration Protocol, RFC 6241) foi criado para suprir as limitações do SNMP e da CLI na configuração de dispositivos de rede. Ele segue o modelo cliente-servidor, em que o gerente (cliente) se comunica com o agente (servidor) no dispositivo, normalmente sobre SSH, na porta 830, o que garante autenticação, integridade e criptografia das mensagens. As mensagens são trocadas em XML, por meio de chamadas RPC, e a estrutura dos dados é descrita por modelos YANG, que tornam a configuração padronizada e independente de fabricante.</p>
+            <p> O NETCONF (Network Configuration Protocol) foi criado para suprir as limitações do SNMP e da CLI na configuração de dispositivos de rede. Ele segue o modelo cliente-servidor, em que o gerente (cliente) se comunica com o agente (servidor) no dispositivo, normalmente sobre SSH, na porta 830, o que garante autenticação, integridade e criptografia das mensagens. As mensagens são trocadas em XML, por meio de chamadas RPC, e a estrutura dos dados é descrita por modelos YANG, que tornam a configuração padronizada e independente de fabricante.</p>
             <p> Diferentemente do OpenFlow, que atua na programação do encaminhamento de pacotes, o NETCONF foi projetado para configurar, instalar e atualizar o estado e as políticas dos dispositivos de forma programática. E, diferentemente do SNMP, voltado principalmente ao monitoramento, o NETCONF tem foco na configuração, embora também execute operações de leitura de estado e monitoramento.</p>
             <p> Em SDN, o NETCONF é normalmente usado para habilitar o OpenFlow e informar o endereço do controlador aos switches. Ele também protege o acesso de gerenciamento aos dispositivos, por meio de SSH e NACM, e pode provisionar as credenciais usadas na proteção do canal de controle.</p>
             <p> Enquanto o OpenFlow realiza a comunicação entre o plano de controle e o plano de encaminhamento (dados), o NETCONF é utilizado para a comunicação entre o plano de gerenciamento e o dispositivo, acessando o estado mantido no plano operacional. Essa comunicação ocorre na interface southbound do plano de gerenciamento (MAL).</p>
@@ -402,13 +415,6 @@
             <p> Seu grande diferencial é o suporte a transações: a configuração pode ser validada, aplicada de forma atômica e revertida (rollback) em caso de erro. O NETCONF também separa a configuração do estado operacional e oferece controle de acesso por usuário e por operação (NACM).</p>
             <p> Além disso, suporta mecanismos de subscrição (Event Notifications, RFC 5277), que permitem ao dispositivo informar ativamente falhas, mudanças de estado ou alarmes, como a alteração do estado de uma interface. </p>
             <p> Suas limitações são o custo maior de processamento do XML e a dependência de que o equipamento tenha modelos YANG adequados, razão pela qual é menos usado para telemetria intensiva. </p>
-            <h3> Northbound Interface </h3>
-            <p> A interface Northbound oferece a comunicação entre os planos de controle e gerenciamento e o plano de aplicação. </p>
-            <p> Diferente da interface Southbound (que possui padrões consolidados de mercado como o OpenFlow), a interface Northbound na RFC 7426 e no ecossistema SDN é predominantemente baseada em APIs e modelos de dados orientados a serviços. Os principais padrões utilizados incluem: </p>
-            <ul>
-                <li> <strong> REST / RESTful APIs (HTTP): </strong> O padrão mais difundido na indústria para a interface Northbound. Permite que as aplicações comuniquem com o controlador SDN utilizando requisições HTTP (GET, POST, PUT, DELETE) e payloads em JSON ou XML. </li>
-                <li> <strong> gRPC / Protocol Buffers: </strong> Utilizado em arquiteturas modernas de SDN de alto desempenho. O gRPC oferece comunicação bidirecional rápida baseada em HTTP/2 e serialização eficiente, sendo ideal para streaming de telemetria e controle em tempo real. </li>
-            </ul>
             <h3> Open vSwitch(OVS)</h3>
             <p> O Open vSwitch é o principal switch utilizado dentro da arquitetura da SDN para redes virtuais. </p>
             <p> O Open vSwitch é um switch virtual multicamada (multilayer virtual switch) de código aberto licenciado sob a licença Apache 2.0. Ele foi projetado para operar em ambientes de virtualização (como KVM, Xen e Proxmox), permitindo gerenciar o tráfego de rede entre máquinas virtuais (VMs) e containers dentro de um mesmo host físico ou entre múltiplos hosts por meio de túneis virtuais. </p>
@@ -430,7 +436,7 @@
                 <li><strong> Complexidade de Diagnóstico: </strong> Depurar problemas de perda de pacotes ou latência em ambientes altamente dinâmicos com múltiplos túneis e regras de fluxo pode ser desafiador.</li>
             </ul>
             <h3> OVSDB </h3>
-            <p> O OVSDB (Open vSwitch Database Management Protocol, RFC 7047) é o protocolo de gerenciamento criado para configurar e supervisionar o Open vSwitch (OVS). Ele pertence ao plano de gerenciamento e atua sobre o dispositivo pela MAL, sem participar da programação das regras de fluxo, que é função do OpenFlow.</p>
+            <p> O OVSDB (Open vSwitch Database Management Protocol) é o protocolo de gerenciamento criado para configurar e supervisionar o Open vSwitch (OVS). Ele pertence ao plano de gerenciamento e atua sobre o dispositivo pela MAL, sem participar da programação das regras de fluxo, que é função do OpenFlow.</p>
             <p> O OVS mantém suas configurações e parte do seu estado em um banco de dados chamado ovsdb-server, que segue um esquema próprio (Open_vSwitch). O protocolo permite que um cliente, como um controlador ou um sistema de orquestração, consulte e modifique esse banco remotamente. Ele é baseado em JSON-RPC e normalmente é transportado sobre TCP (porta 6640, por convenção) ou TLS, também podendo usar socket Unix localmente.</p>
             <p> O banco é organizado em tabelas, e as principais são: </p>
             <ul> 
