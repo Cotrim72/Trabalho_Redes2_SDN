@@ -533,7 +533,7 @@
             <p> O controlador remove o nó e todos os seus enlaces da topologia e recalcula e reinstala as rotas afetadas. Quando o equipamento volta, ele refaz a conexão TCP, é redescoberto e reprogramado (o plano de gerenciamento pode reaplicar a configuração)</p>
 
             <h3> Detecção de queda do Controlador </h3>
-            <p> o switch detecta por TCP encerrado ou timeout de Echo.Com isso, switches entram em modo fail-secure (mantêm as regras existentes, sem novas) ou fail-standalone (voltam a operar como switch L2 tradicional). </p>
+            <p> o switch detecta por TCP encerrado ou timeout de Echo. Com isso, switches entram em modo fail-secure (mantêm as regras existentes, sem novas) ou fail-standalone (voltam a operar como switch L2 tradicional). </p>
             <p> A mitigação é usar múltiplos controladores (papéis master/slave/equal do OpenFlow) e clusters distribuídos (ONOS, ODL). </p>
 
             <h3> Prevenção de Loops </h3>
@@ -551,68 +551,118 @@
         <!-- 6. Desafios e Mitigações -->
         <section id="desafios">
             <h2>6. Desafios e Mitigações</h2>
+
             <h3>Ponto Único de Falha e Escalabilidade</h3>
-            <p> No modelo tradicional de SDN, adota-se um controlador centralizado responsável por gerenciar as tabelas de fluxo dos switches no plano de dados. Contudo, essa arquitetura apresenta limitações críticas: além de constituir um ponto único de falha (Single Point of Failure - SPOF) — cuja indisponibilidade paralisa o encaminhamento de pacotes —, a centralização gera um gargalo de escalabilidade, dificultando o suporte a redes de grande porte com alto volume de requisições. </p>
-            <p> Com base nisso surge o controlador distribuído (Cluster) que consiste em múltiplos nós de controladores trabalhando em conjunto para gerenciar a infraestrutura. </p>
-            <p> Entre suas vantagens temos: alta disponibilidade, tolerância a falhas (resiliência) e escalabilidade geográfica. Exemplos famosos incluem o OpenDaylight e o ONOS rodando em modo cluster.</p>
-            <h4> OpenDaylight(ODL) </h4>
-            <p> O OpenDaylight, gerido pela Linux Foundation, é o projeto de controlador SDN open-source mais antigo e abrangente da indústria. </p>
-            <p> É uma plataforma modular extremamente flexível construída em Java (sobre o framework OSGi). O ODL funciona como uma "caixa de ferramentas": ele não impõe uma única aplicação de rede, mas fornece dezenas de módulos que você pode ativar ou desativar conforme a necessidade (suportando OpenFlow, NETCONF/YANG, BGP, OSPF, etc.).</p>
-            <p> Foco Principal: Redes de grandes empresas (Enterprise), data centers corporativos e ambientes heterogêneos que precisam integrar tecnologias tradicionais e programáveis.</p>
+            <p><strong>Desafio:</strong> no modelo tradicional de SDN, adota-se um controlador centralizado responsável por gerenciar as tabelas de fluxo dos switches no plano de dados. Essa arquitetura constitui um ponto único de falha (Single Point of Failure - SPOF), cuja indisponibilidade paralisa o encaminhamento de novos fluxos, e gera um gargalo de escalabilidade, dificultando o suporte a redes de grande porte com alto volume de requisições.</p>
+            <p><strong>Mitigação:</strong> controlador distribuído (cluster), que consiste em múltiplos nós de controladores trabalhando em conjunto para gerenciar a infraestrutura. Suas vantagens são alta disponibilidade, tolerância a falhas (resiliência) e escalabilidade geográfica. Exemplos famosos são o OpenDaylight e o ONOS rodando em modo cluster.</p>
+
+            <h4> OpenDaylight (ODL) </h4>
+            <p> O OpenDaylight, gerido pela Linux Foundation, é o projeto de controlador SDN open-source mais antigo e abrangente da indústria. É uma plataforma modular extremamente flexível construída em Java (sobre o framework OSGi). O ODL funciona como uma "caixa de ferramentas": não impõe uma única aplicação de rede, mas fornece dezenas de módulos que podem ser ativados ou desativados conforme a necessidade (suportando OpenFlow, NETCONF/YANG, BGP, OSPF, etc.).</p>
+            <p> <strong>Foco principal:</strong> redes de grandes empresas (Enterprise), data centers corporativos e ambientes heterogêneos que precisam integrar tecnologias tradicionais e programáveis.</p>
             <p> Vantagens: </p>
             <ul>
                 <li> Ecossistema massivo e maduro, com suporte a uma enorme variedade de protocolos Southbound.</li>
-                <li> Extremamente flexível e personalizável para diferentes use-cases. </li>
+                <li> Extremamente flexível e personalizável para diferentes casos de uso.</li>
             </ul>
             <p> Desvantagem: </p>
             <ul>
-                <li> Curva de aprendizado íngreme e alta complexidade de configuração devido à sua arquitetura modular pesada. </li>
+                <li> Curva de aprendizado íngreme e alta complexidade de configuração devido à sua arquitetura modular pesada.</li>
             </ul>
+
             <h4> ONOS </h4>
-            <p> O ONOS, também hospedado pela Linux Foundation, foi construído do zero com um foco diferente: atender às demandas de redes de operadoras de telecomunicações (Carrier-Grade e WANs de alta escala).</p>
-            <p> Foi projetado desde o início para operar em cluster distribuído, priorizando alta disponibilidade, resiliência e desempenho em tempo real. Ele trata o cluster de controladores como um único sistema operacional de rede lógico. O ONOS aposta fortemente no conceito de Intent-Based Networking (redes baseadas em intenção). </p>
-            <p> Foco Principal: Provedores de serviços de internet (ISPs), redes de longa distância (WAN), redes de acesso óptico e infraestruturas críticas onde a queda de um nó não pode derrubar a rede. </p>
+            <p> O ONOS, também hospedado pela Linux Foundation, foi construído do zero para atender às demandas de redes de operadoras de telecomunicações (Carrier-Grade e WANs de alta escala). Foi projetado desde o início para operar em cluster distribuído, priorizando alta disponibilidade, resiliência e desempenho em tempo real. Trata o cluster de controladores como um único sistema operacional de rede lógico e aposta fortemente no conceito de Intent-Based Networking (redes baseadas em intenção).</p>
+            <p> <strong>Foco principal:</strong> provedores de serviços de internet (ISPs), redes de longa distância (WAN), redes de acesso óptico e infraestruturas críticas onde a queda de um nó não pode derrubar a rede.</p>
             <p> Vantagens: </p>
             <ul>
-                <li> Arquitetura distribuída nativa altamente eficiente (ótima para evitar o SPOF e garantir escalabilidade) </li>
-                <li> Excelente desempenho (throughput e latência no processamento de fluxos). </li>
-                <li> Foco em abstrações de alto nível (Intents). </li>
+                <li> Arquitetura distribuída nativa altamente eficiente (ótima para evitar o SPOF e garantir escalabilidade).</li>
+                <li> Excelente desempenho (throughput e latência no processamento de fluxos).</li>
+                <li> Foco em abstrações de alto nível (Intents).</li>
             </ul>
             <p> Desvantagem: </p>
             <ul>
-                <li> Pode ser excessivamente complexo se implantado em redes pequenas ou ambientes que exigem apenas simplicidade monolítica. </li>
+                <li> Pode ser excessivamente complexo se implantado em redes pequenas ou ambientes que exigem apenas simplicidade monolítica.</li>
             </ul>
-            <h3>Segurança: Criptografia (TLS/SSL)</h3>
-            <p><strong>Desafio:</strong> Interceptação do tráfego de controle entre o controlador e os switches.<br>
-            <strong>Mitigação:</strong> Obrigatoriedade do uso de canais criptografados com TLS/SSL para toda comunicação no canal de controle.</p>
+
+            <h3>Segurança</h3>
+            <p><strong>Desafio:</strong> a centralização torna o controlador um alvo valioso: quem o compromete controla toda a rede (SCOTT-HAYWARD; NATARAJAN; SEZER, 2016). Além disso, o canal de controle e as interfaces Northbound ampliam a superfície de ataque. Os principais vetores, cada um com sua mitigação, são:</p>
+            <ul>
+                <li><strong> Interceptação do canal de controle: </strong> leitura ou alteração das mensagens OpenFlow entre controlador e switches.<br>
+                    <strong>Mitigação:</strong> obrigatoriedade de TLS/SSL com autenticação mútua (certificados nos dois lados).</li>
+                <li><strong> Saturação (DoS) do controlador e dos switches: </strong> um atacante gera muitos pacotes com cabeçalhos novos, causando uma enxurrada de Packet-In que esgota o controlador e a Flow Table (SHIN; GU, 2013).<br>
+                    <strong>Mitigação:</strong> limitação de taxa de Packet-In, regras proativas e mecanismos como o Avant-Guard (SHIN et al., 2013).</li>
+                <li><strong> Envenenamento de topologia: </strong> como o controlador descobre enlaces via LLDP, um host malicioso pode forjar quadros LLDP e criar enlaces falsos.<br>
+                    <strong>Mitigação:</strong> autenticação dos quadros LLDP e aceitação apenas em portas entre switches, como no TopoGuard (HONG et al., 2015).</li>
+                <li><strong> Aplicações maliciosas ou defeituosas: </strong> uma aplicação na Northbound pode instalar regras indevidas.<br>
+                    <strong>Mitigação:</strong> autenticação e autorização (RBAC) nas APIs, isolamento (sandbox) das aplicações e auditoria das regras instaladas.</li>
+                <li><strong> Falsificação de identidade (spoofing de ARP/MAC/IP): </strong> hosts que se passam por outros para desviar ou capturar tráfego.<br>
+                    <strong>Mitigação:</strong> o controlador valida associações host–porta–endereço e instala regras de bloqueio.</li>
+            </ul>
+            <p>Em contrapartida, a SDN também melhora a segurança, pois permite reagir a ameaças programaticamente (ver seção 7).</p>
 
             <h3>Desempenho</h3>
-            <p><strong>Desafio:</strong> Gargalos no controlador devido ao grande volume de pacotes desconhecidos requerendo instrução.<br>
-            <strong>Mitigação:</strong> Arquitetura de controle hierárquica, processamento de fluxos reativo/proativo e switches inteligentes com suporte a P4.</p>
-            <h3>Consistência de Atualizações e Conflito entre Aplicações</h3>
-            <p><strong>Desafio:</strong> Em uma SDN várias aplicações (firewall, balanceador, roteamento, QoS) podem gerar regras ao mesmo tempo para os mesmos fluxos. Isso pode causar conflitos (ex.: o firewall bloqueia um tráfego que o balanceador tenta redirecionar) ou buracos e loops temporários quando switches são atualizados em momentos diferentes (problema já visto na seção 5).</p>
+            <p><strong>Desafio:</strong> gargalos no controlador devido ao grande volume de pacotes desconhecidos requerendo instrução.<br>
+            <strong>Mitigação:</strong> arquitetura de controle hierárquica, processamento de fluxos reativo/proativo e switches inteligentes com suporte a P4.</p>
+
+            <h3>Limitação da Tabela de Fluxo (TCAM)</h3>
+            <p><strong>Desafio:</strong> a TCAM dos switches é cara, consome muita energia e comporta apenas milhares de entradas, enquanto uma rede grande pode ter centenas de milhares de fluxos simultâneos (CURTIS et al., 2011).</p>
             <p><strong>Mitigação:</strong></p>
             <ul>
-                <li> Atualizações em duas fases (two-phase update), como descrito na seção 5, para que cada pacote seja tratado inteiramente pela configuração antiga ou inteiramente pela nova. </li>
-                <li> Uso de prioridades e de um módulo de composição de políticas para resolver conflitos entre aplicações. </li>
-                <li> Verificação formal de regras antes (ou logo depois) de instalá-las, com ferramentas de pesquisa como o VeriFlow, o Header Space Analysis e o NetPlumber, que detectam loops, buracos negros e violações de isolamento. </li>
-                <li> Abordagem baseada em intenção (Intents): o operador declara "o quê" (ex.: conectividade entre A e B com 1 Gbps) e o controlador traduz isso para regras e as reconcilia automaticamente. </li>
+                <li> Agregar fluxos com campos curinga (wildcards) em vez de uma regra por conexão.</li>
+                <li> Usar timeouts (idle/hard) para remover regras ociosas.</li>
+                <li> Usar múltiplas tabelas (OpenFlow 1.3+) para evitar o produto cartesiano de regras.</li>
+                <li> Combinar regras proativas básicas com regras reativas sob demanda (modo híbrido).</li>
+            </ul>
+
+            <h3>Latência e Posicionamento de Controladores</h3>
+            <p><strong>Desafio:</strong> em redes geograficamente distribuídas, a distância entre switch e controlador aumenta a latência do primeiro pacote de cada fluxo e o tempo de reação a falhas. Surge o <em>controller placement problem</em>: quantos controladores usar e onde colocá-los (HELLER; SHERWOOD; McKEOWN, 2012).</p>
+            <p><strong>Mitigação:</strong></p>
+            <ul>
+                <li> Clusters distribuídos (ONOS, ODL) com controladores próximos dos switches.</li>
+                <li> Controle hierárquico: controladores locais e um controlador raiz.</li>
+                <li> Regras proativas e Fast Failover Groups, que permitem ao switch reagir localmente sem consultar o controlador.</li>
+            </ul>
+
+            <h3>Consistência de Atualizações e Conflito entre Aplicações</h3>
+            <p><strong>Desafio:</strong> em uma SDN várias aplicações (firewall, balanceador, roteamento, QoS) podem gerar regras ao mesmo tempo para os mesmos fluxos. Isso pode causar conflitos (ex.: o firewall bloqueia um tráfego que o balanceador tenta redirecionar) ou buracos e loops temporários quando switches são atualizados em momentos diferentes (problema já visto na seção 5).</p>
+            <p><strong>Mitigação:</strong></p>
+            <ul>
+                <li> Atualizações em duas fases (two-phase update), como descrito na seção 5, para que cada pacote seja tratado inteiramente pela configuração antiga ou inteiramente pela nova.</li>
+                <li> Uso de prioridades e de um módulo de composição de políticas para resolver conflitos entre aplicações.</li>
+                <li> Verificação formal de regras antes (ou logo depois) de instalá-las, com ferramentas de pesquisa como o VeriFlow, o Header Space Analysis e o NetPlumber, que detectam loops, buracos negros e violações de isolamento.</li>
+                <li> Abordagem baseada em intenção (Intents): o operador declara "o quê" (ex.: conectividade entre A e B com 1 Gbps) e o controlador traduz isso para regras e as reconcilia automaticamente.</li>
             </ul>
 
             <h3>Migração, Interoperabilidade e Capacitação</h3>
-            <p><strong>Desafio:</strong> Poucas organizações podem trocar toda a rede de uma vez (cenário brownfield). Além disso, o OpenFlow não é suportado de forma idêntica por todos os fabricantes e a Northbound API não possui um padrão único, o que gera risco de dependência de fornecedor (vendor lock-in). Há ainda a barreira humana: equipes acostumadas com a CLI precisam aprender APIs, Python/REST, YANG e práticas de DevOps.</p>
+            <p><strong>Desafio:</strong> poucas organizações podem trocar toda a rede de uma vez (cenário brownfield). Além disso, o OpenFlow não é suportado de forma idêntica por todos os fabricantes e a Northbound API não possui um padrão único, o que gera risco de dependência de fornecedor (vendor lock-in). Há ainda a barreira humana: equipes acostumadas com a CLI precisam aprender APIs, Python/REST, YANG e práticas de DevOps.</p>
             <p><strong>Mitigação:</strong></p>
             <ul>
                 <li><strong> SDN híbrido: </strong> switches que executam, ao mesmo tempo, o plano de controle tradicional (OSPF, BGP) e o OpenFlow, permitindo migrar por etapas (ex.: começar apenas pelo data center ou por uma filial).</li>
                 <li><strong> Modelos de dados padronizados (YANG/NETCONF): </strong> reduzem a dependência de CLI proprietária.</li>
-                <li><strong> Laboratório e emulação antes da produção: </strong> ferramentas como Mininet permitem testar topologias e aplicações sem hardware (veja o exemplo prático na seção 7).</li>
+                <li><strong> Laboratório e emulação antes da produção: </strong> ferramentas como Mininet permitem testar topologias e aplicações sem hardware.</li>
                 <li><strong> Capacitação e cultura NetDevOps: </strong> automação, versionamento de configuração e testes contínuos.</li>
             </ul>
+
+            <h3>Resumo dos Desafios e Mitigações</h3>
+            <div class="tabela-wrap">
+                <table class="tabela">
+                    <thead><tr><th>Desafio</th><th>Causa</th><th>Mitigação principal</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>SPOF / escalabilidade</strong></td><td>Controlador centralizado</td><td>Cluster distribuído (ONOS, ODL), múltiplos controladores master/slave</td></tr>
+                        <tr><td><strong>Segurança</strong></td><td>Canal de controle e controlador como alvos</td><td>TLS mútuo, rate limiting, RBAC, validação de LLDP</td></tr>
+                        <tr><td><strong>Desempenho</strong></td><td>Excesso de Packet-In</td><td>Regras proativas, controle hierárquico, P4</td></tr>
+                        <tr><td><strong>Limite da TCAM</strong></td><td>Memória cara e pequena</td><td>Agregação de fluxos, timeouts, múltiplas tabelas</td></tr>
+                        <tr><td><strong>Latência / posicionamento</strong></td><td>Distância switch–controlador</td><td>Múltiplos controladores, controle hierárquico, Fast Failover</td></tr>
+                        <tr><td><strong>Consistência</strong></td><td>Atualizações assíncronas e aplicações concorrentes</td><td>Two-phase update, VeriFlow, Intents</td></tr>
+                        <tr><td><strong>Migração</strong></td><td>Redes legadas e falta de capacitação</td><td>SDN híbrido, YANG/NETCONF, Mininet, NetDevOps</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
 
         <!-- 7. Aplicações -->
         <section id="aplicacoes">
             <h2>7. Aplicações</h2>
+
             <h3>SD-WAN (Software-Defined WAN)</h3>
             <p>Aplicação da tecnologia SDN em redes de longa distância para gerenciar dinamicamente múltiplos tipos de conexões (MPLS, Internet, 4G/5G) com menor custo e maior eficiência.</p>
             <p><strong>Exemplo prático:</strong> uma rede de lojas com uma matriz e 200 filiais. Cada filial tem um link MPLS (caro e estável) e um link de internet banda larga (barato). O controlador SD-WAN monitora latência, jitter e perda de cada link e aplica políticas por aplicação: voz e sistema de pagamento (PDV) seguem pelo caminho com melhor qualidade, enquanto backups e navegação usam a internet comum. Se o MPLS falhar, o tráfego crítico é movido automaticamente para a internet em segundos.</p>
@@ -623,7 +673,7 @@
                 <li><strong> Exemplos de soluções comerciais: </strong> Cisco SD-WAN, VMware VeloCloud, Fortinet Secure SD-WAN.</li>
             </ul>
 
-             <h3>Operadoras de Telecomunicações e Redes 5G (Telco SDN)</h3>
+            <h3>Operadoras de Telecomunicações e Redes 5G (Telco SDN)</h3>
             <p>SDN possibilita a virtualização de funções de rede, criação de fatiamento de rede (Network Slicing) no 5G e gestão dinâmica de banda sob demanda.</p>
             <p><strong>Network Slicing na prática:</strong> sobre a mesma infraestrutura física, a operadora cria redes lógicas isoladas, cada uma com requisitos próprios. Os três grandes tipos de serviço do 5G são:</p>
             <ul>
@@ -635,7 +685,7 @@
             <p><strong>SD-RAN:</strong> a ideia de separar controle e dados também chegou à rede de acesso por rádio. Na arquitetura Open RAN, um controlador inteligente (RIC - RAN Intelligent Controller) hospeda aplicações que ajustam parâmetros de rádio, balanceiam carga entre antenas e otimizam o consumo de energia.</p>
 
             <h3>Datacenters</h3>
-            <p>Permite automação completa do provisionamento de redes virtuais, multitenancy seguro, otimização do uso de links e facilidade no orchestration de microsserviços e contêineres.</p>
+            <p>Permite automação completa do provisionamento de redes virtuais, multitenancy seguro, otimização do uso de links e facilidade na orquestração de microsserviços e contêineres.</p>
             <ul>
                 <li><strong> Virtualização de rede em nuvens (overlay): </strong> plataformas como OpenStack (Neutron com OVN/Open vSwitch) criam redes virtuais isoladas por cliente usando túneis VXLAN ou Geneve sobre a rede física, como visto na seção 4 com o OVS.</li>
                 <li><strong> Contêineres e Kubernetes: </strong> plugins de rede (CNI) como Calico e Cilium aplicam políticas de rede (NetworkPolicy) entre pods de forma programável.</li>
@@ -644,9 +694,26 @@
                 <li><strong> Balanceamento de carga em fabric leaf-spine: </strong> a SDN distribui fluxos por múltiplos caminhos de mesmo custo, evitando links congestionados.</li>
             </ul>
 
+            <h3>Engenharia de Tráfego em WANs entre Datacenters</h3>
+            <p>Em redes tradicionais, enlaces de longa distância costumam ser subutilizados para evitar congestionamento, pois o roteamento distribuído não enxerga a demanda global. O Google, com a rede <strong>B4</strong>, usou SDN para coletar a demanda das aplicações, calcular caminhos por múltiplos enlaces e instalar as regras de forma centralizada (JAIN et al., 2013). A Microsoft seguiu caminho semelhante com o SWAN (HONG et al., 2013). Ambos elevaram muito a utilização dos enlaces e permitiram priorizar tráfego crítico sobre transferências em massa, como backups e replicação de dados.</p>
+
+            <h3>Segurança: Firewall Dinâmico e Mitigação de DDoS</h3>
+            <p>Com visão global e controle programável, a rede pode reagir a ameaças em tempo real (YAN et al., 2016):</p>
+            <ul>
+                <li><strong> Detecção e bloqueio: </strong> contadores de fluxo (STATS_REQUEST) alimentam um detector de anomalias; ao identificar um ataque, o controlador instala regras de descarte nos switches mais próximos da origem.</li>
+                <li><strong> Desvio para limpeza (scrubbing): </strong> o tráfego suspeito é redirecionado para um filtro (como um IDS/IPS virtual) e o restante segue normalmente.</li>
+                <li><strong> Quarentena automática: </strong> um host infectado é isolado dinamicamente, sem intervenção manual em cada equipamento.</li>
+            </ul>
+
+            <h3>Redes de Campus, Empresariais e Sem Fio</h3>
+            <p>Em campus e empresas, a SDN centraliza políticas que antes dependiam de configuração switch a switch: segmentação por perfil de usuário (aluno, professor, visitante), controle de acesso (NAC) e QoS por aplicação. Em redes Wi-Fi, o controle centralizado facilita o roaming e o balanceamento de clientes entre pontos de acesso, aplicando a mesma política independentemente de o usuário estar no cabo ou no Wi-Fi.</p>
+
+            <h3>IoT e Edge Computing</h3>
+            <p>Em cenários de IoT, milhares de dispositivos heterogêneos exigem segmentação e políticas por tipo de dispositivo (por exemplo, uma câmera só pode falar com o servidor de gravação). A SDN aplica essas regras de forma centralizada e, em arquiteturas de <em>edge computing</em>, direciona o tráfego ao nó de borda mais próximo, reduzindo a latência (BERA; MISRA; VASILAKOS, 2017).</p>
+
             <h3>SDN x NFV</h3>
             <p>Enquanto o <strong>SDN</strong> separa o controle do encaminhamento para centralizar a inteligência, a <strong>NFV (Network Functions Virtualization)</strong> foca em virtualizar as funções de rede (como roteadores, firewalls e NATs), rodando-as em software sobre hardware genérico. São tecnologias complementares.</p>
-            
+
             <div class="tabela-wrap">
                 <table class="tabela">
                     <thead>
@@ -688,15 +755,64 @@
 
             <p><strong>Exemplo de uso conjunto: Service Function Chaining (SFC).</strong> O tráfego de um cliente precisa passar por uma "cadeia" de funções: firewall → IDS → NAT. Com NFV, cada função é uma máquina virtual ou contêiner rodando em servidores genéricos. Com SDN, o controlador instala as regras dinâmicas que conduzem os pacotes exatamente por essa sequência de funções, permitindo alterar a ordem ou inserir novos serviços de segurança para cada cliente apenas reprogramando os fluxos via software, sem nenhuma alteração no cabeamento físico.</p>
 
+            <h3>Resumo das Aplicações</h3>
+            <div class="tabela-wrap">
+                <table class="tabela">
+                    <thead><tr><th>Aplicação</th><th>Problema resolvido</th><th>Benefício da SDN</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>SD-WAN</strong></td><td>Custo e gestão de múltiplos links</td><td>Roteamento por aplicação e ZTP</td></tr>
+                        <tr><td><strong>Telco / 5G</strong></td><td>Serviços com requisitos distintos</td><td>Network Slicing e SD-RAN</td></tr>
+                        <tr><td><strong>Datacenters</strong></td><td>Multitenancy e agilidade</td><td>Overlay, microssegmentação, migração de VMs</td></tr>
+                        <tr><td><strong>Engenharia de tráfego</strong></td><td>Subutilização de enlaces</td><td>Roteamento baseado em demanda global</td></tr>
+                        <tr><td><strong>Segurança</strong></td><td>Resposta lenta a ataques</td><td>Bloqueio e quarentena programáticos</td></tr>
+                        <tr><td><strong>Campus / Wi-Fi</strong></td><td>Políticas inconsistentes</td><td>Política única e centralizada</td></tr>
+                        <tr><td><strong>IoT / Edge</strong></td><td>Muitos dispositivos heterogêneos</td><td>Segmentação e direcionamento por dispositivo</td></tr>
+                        <tr><td><strong>NFV / SFC</strong></td><td>Funções de rede presas a hardware dedicado</td><td>Encadeamento dinâmico de funções virtualizadas</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- 8. Conclusão -->
         <section id="conclusao">
             <h2>8. Conclusão</h2>
-            <p>A arquitetura SDN revolucionou a maneira como projetamos e operamos redes de computadores. Ao trazer a programabilidade e a automação do software para o mundo do hardware de rede, o SDN tornou-se o pilar fundamental para ecossistemas modernos como computação em nuvem, data centers de grande escala e redes 5G.</p>
+            <p>A transição de redes tradicionais para <strong>Redes Definidas por Software (SDN)</strong> representa uma mudança estrutural na forma como o plano de controle e o plano de encaminhamento são projetados, operados e evoluídos. Ao centralizar logicamente a inteligência da rede e expor interfaces programáveis, a SDN viabiliza visibilidade global da topologia, automação de políticas e adaptação dinâmica do tráfego em cenários exigentes — como <strong>SD-WAN</strong>, <strong>redes 5G e <em>Network Slicing</em></strong>, <strong>engenharia de tráfego em <em>backbones</em></strong>, <strong>automação de <em>datacenters</em></strong>, <strong>IoT/<em>Edge Computing</em></strong> e <strong>encadeamento de funções de rede (SFC)</strong> em conjunto com <strong>NFV</strong>.</p>
+            <p>Ao mesmo tempo, centralizar o controle introduz desafios críticos que exigem engenharia cuidadosa: o risco de <strong>ponto único de falha (SPOF)</strong> e gargalos de escalabilidade, a necessidade de proteger o plano de controle e o canal de comunicação contra saturação (<em>Packet-In flood</em>) e envenenamento de topologia (como ataques a LLDP), as limitações físicas de memória (<strong>TCAM</strong>) e latência no <strong>posicionamento de controladores</strong>, além da consistência durante atualizações concorrentes e da convivência com infraestruturas legadas (<em>brownfield</em>). Na prática, a adoção bem-sucedida de SDN passa por arquiteturas distribuídas ou híbridas, políticas de segurança em camadas, verificação de regras e uso complementar de padrões como OpenFlow, NETCONF/YANG, OVSDB e planos de dados programáveis.</p>
         </section>
 
         <!-- 9. Perguntas -->
         <section id="perguntas">
-            <h2>9. Perguntas </h2>
+            <h2>9. Perguntas</h2>
+
+            <div class="faq-item">
+                <h4>1. Por que a centralização do controle em uma SDN não elimina completamente o risco de loops temporários ou conflitos de encaminhamento durante mudanças de rota ou quando múltiplas aplicações atuam simultaneamente, e como essas falhas podem ser mitigadas?</h4>
+                <p>Embora o controlador tenha a visão global do grafo da rede e calcule caminhos sem ciclos, a instalação de regras nos <em>switches</em> não ocorre de forma instantânea nem perfeitamente sincronizada — há latências de rede e tempos distintos de processamento no plano de dados. Se o controlador atualizar um <em>switch</em> intermediário antes do <em>switch</em> de entrada (ou remover uma regra antiga antes de instalar a nova), pacotes em trânsito podem passar por estados mistos, gerando <em>loops</em> transitórios ou <em>blackholes</em> (descartes indevidos).</p>
+                <p>Além disso, se aplicações distintas (como um módulo de <em>QoS</em>, um balanceador de carga e um <em>firewall</em>) emitirem regras sobrepostas sem coordenação, podem ocorrer conflitos de prioridade ou bloqueios indesejados. As mitigações combinam <strong>atualizações em duas fases (<em>two-phase update</em>)</strong>, uso de <strong>prioridades e composição de políticas</strong>, <strong>verificação formal</strong> (como <em>VeriFlow</em> ou <em>NetPlumber</em>) e modelos <strong>baseados em intenção (<em>Intents</em>)</strong>, em que o sistema reconcilia o estado desejado em vez de depender apenas de comandos imperativos isolados.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>2. Em uma rede SDN baseada em OpenFlow e descoberta por LLDP, como diferem os mecanismos de ataque e defesa entre uma saturação do plano de controle (Packet-In flooding) e um ataque de envenenamento de topologia?</h4>
+                <p>Na <strong>saturação do plano de controle</strong>, o foco é esgotar recursos computacionais e de comunicação: um atacante envia um volume alto de pacotes que não casam com nenhuma regra existente (<em>table-miss</em>), forçando os <em>switches</em> a encapsular e enviar repetidas mensagens <em>Packet-In</em> ao controlador (e sobrecarregando a TCAM com entradas efêmeras). A defesa envolve <strong>limitação de taxa (<em>rate limiting</em>)</strong> no plano de dados, instalação de regras proativas ou agregadas com <em>wildcards</em> e arquiteturas que filtram ou tratam fluxos na borda (como o <em>AVANT-GUARD</em>).</p>
+                <p>Já no <strong>envenenamento de topologia</strong>, o objetivo é corromper a visão lógica da rede que o controlador mantém em memória: como a descoberta de enlaces frequentemente se apoia em quadros LLDP repassados entre <em>switches</em>, um nó malicioso pode forjar ou interceptar quadros LLDP para simular enlaces inexistentes ou ocultar caminhos reais, distorcendo o cálculo de rotas. A mitigação exige <strong>autenticação/validação de quadros LLDP</strong>, restrição de onde quadros LLDP são aceitos ou gerados (como no <em>TopoGuard</em>) e validação das associações entre portas, endereços e <em>hosts</em>.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>3. Por que não basta simplesmente instalar regras altamente granulares para cada fluxo na TCAM dos switches SDN, e quais trade-offs surgem entre modo reativo, modo proativo e modo híbrido?</h4>
+                <p>A memória <strong>TCAM</strong> (<em>Ternary Content-Addressable Memory</em>) permite buscas paralelas em um ciclo de clock para regras com <em>wildcards</em>, mas é cara, consome bastante energia e tem capacidade limitada em comparação à quantidade de fluxos simultâneos em redes grandes. Instalar uma regra exata por fluxo esgota rapidamente essa memória e aumenta o custo de hardware.</p>
+                <p>Por outro lado, o <strong>modo reativo</strong> economiza entradas na tabela ao instalar regras sob demanda após um <em>Packet-In</em>, mas adiciona latência ao primeiro pacote de cada fluxo e pode sobrecarregar o controlador em picos de tráfego. O <strong>modo proativo</strong> reduz a latência inicial e a carga no controlador ao pré-instalar rotas, porém exige mais memória e pode gerar regras ociosas se o tráfego não ocorrer. O <strong>modo híbrido</strong> busca equilibrar esses extremos mantendo regras fundamentais ou agregadas proativamente e tratando casos específicos ou exceções de forma reativa, apoiado por <em>timeouts</em> (<em>idle</em> e <em>hard</em>) e múltiplas tabelas.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>4. Em uma rede de longa distância (WAN) ou multi-site, por que apenas adicionar mais nós de controle em um cluster não resolve sozinho o problema de latência de resposta, e como o controller placement problem impacta a operação?</h4>
+                <p>O <em>controller placement problem</em> trata de <strong>quantos</strong> controladores instanciar e <strong>onde</strong> posicioná-los na topologia. Mesmo que um <em>cluster</em> (como ONOS ou OpenDaylight) evite o ponto único de falha e aumente a capacidade total de processamento, a distância física e de rede entre um <em>switch</em> e o controlador responsável por ele ainda impõe latência de ida e volta para mensagens de controle e para a sincronização de estado entre réplicas do <em>cluster</em>.</p>
+                <p>Se um <em>switch</em> precisar consultar um controlador distante para resolver falhas ou instalar fluxos críticos, a recuperação será mais lenta e a sincronização do estado global poderá sofrer atrasos. Por isso, o posicionamento costuma ser combinado com <strong>controladores próximos aos pontos de maior demanda</strong>, <strong>hierarquias de controle</strong> ou <strong>mecanismos locais no plano de dados</strong> (como <em>Fast Failover Groups</em> e regras proativas), permitindo que o <em>switch</em> reaja rapidamente sem esperar uma viagem completa até o controlador.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>5. Por que SDN e NFV não são tecnologias concorrentes que se substituem, e como elas trabalham juntas em um cenário de Service Function Chaining (SFC)?</h4>
+                <p>A <strong>SDN</strong> separa o plano de controle do plano de encaminhamento para centralizar a decisão e programar o tráfego na rede, enquanto a <strong>NFV</strong> virtualiza funções de rede (como <em>firewall</em>, NAT, balanceador ou IDS) para que rodem como <em>softwares</em> (VMs ou contêineres) em servidores de propósito geral em vez de caixas físicas dedicadas. Cada uma pode existir sem a outra, mas juntas ampliam a flexibilidade operacional.</p>
+                <p>No <strong>Service Function Chaining (SFC)</strong>, o tráfego de determinado serviço ou cliente precisa atravessar uma sequência específica de funções (por exemplo, <em>firewall</em> → IDS → NAT). A NFV fornece as instâncias virtualizadas dessas funções onde o processamento ocorre, e a SDN atua programando os fluxos e encapsulamentos/caminhos para direcionar os pacotes exatamente por essa cadeia — permitindo ajustar a ordem das funções ou criar cadeias diferentes por cliente via <em>software</em>, sem alterar o cabeamento físico.</p>
+            </div>
         </section>
 
         <!-- 10. Referências -->
@@ -704,7 +820,15 @@
             <h2>10. Referências</h2>
             <div class="referencias" style="font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.5;">
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    CISCO. <b>Software-Defined Networking (SDN): What It Is and How It Works</b>. Disponível em: &lt;https://www.cisco.com/c/en/us/solutions/software-defined-networking/overview.html&gt;. Acesso em: 19 out. 2026.
+                    BERA, S.; MISRA, S.; VASILAKOS, A. V. Software-Defined Networking for Internet of Things: A Survey. <b>IEEE Internet of Things Journal</b>, v. 4, n. 6, 2017.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    CISCO. <b>Software-Defined Networking (SDN): What It Is and How It Works</b>. Disponível em: &lt;https://www.cisco.com/c/en/us/solutions/software-defined-networking/overview.html&gt;.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    CURTIS, A. R. et al. DevoFlow: Scaling Flow Management for High-Performance Networks. In: ACM SIGCOMM, 2011, Toronto. <b>Proceedings...</b> New York: ACM, 2011.
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
@@ -712,31 +836,47 @@
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    GEEKSFORGEEKS. <b>Software Defined Networking (SDN)</b>. Disponível em: &lt;https://www.geeksforgeeks.org/computer-networks/software-defined-networking/&gt;. Acesso em: 19 out. 2026.
+                    GEEKSFORGEEKS. <b>Software Defined Networking (SDN)</b>. Disponível em: &lt;https://www.geeksforgeeks.org/computer-networks/software-defined-networking/&gt;.
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    HALEPLIDIS, E. Overview of RFC7426: SDN layers and architecture terminology. <b>IEEE SDN Newsletter</b>, set. 2017. Disponível em: &lt;https://sdn.ieee.org/newsletter/september-2017/overview-of-rfc7426-sdn-layers-and-architecture-terminology&gt;. Acesso em: 19 out. 2026.
+                    HALEPLIDIS, E. Overview of RFC7426: SDN layers and architecture terminology. <b>IEEE SDN Newsletter</b>, set. 2017. Disponível em: &lt;https://sdn.ieee.org/newsletter/september-2017/overview-of-rfc7426-sdn-layers-and-architecture-terminology&gt;.
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 1953</b>: Ipsilon Flow Management Protocol Specification for IPv4 Version 1.0. Disponível em: &lt;https://www.rfc-editor.org/info/rfc1953&gt;. Acesso em: 19 out. 2026.
+                    HELLER, B.; SHERWOOD, R.; McKEOWN, N. The Controller Placement Problem. In: HOTSDN, 1., 2012, Helsinque. <b>Proceedings...</b> New York: ACM, 2012.
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 2297</b>: Ipsilon's General Switch Management Protocol Specification Version 2.0. Disponível em: &lt;https://www.rfc-editor.org/info/rfc2297&gt;. Acesso em: 19 out. 2026.
+                    HONG, C.-Y. et al. Achieving High Utilization with Software-Driven WAN. In: ACM SIGCOMM, 2013, Hong Kong. <b>Proceedings...</b> New York: ACM, 2013.
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 7149</b>: Software-Defined Networking: A Perspective from Within a Service Provider Environment. Disponível em: &lt;https://www.rfc-editor.org/info/rfc7149&gt;. Acesso em: 19 out. 2026.
+                    HONG, S. et al. Poisoning Network Visibility in Software-Defined Networks: New Attacks and Countermeasures. In: NDSS, 2015, San Diego. <b>Proceedings...</b> Reston: Internet Society, 2015.
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 7426</b>: Software-Defined Networking (SDN): Layers and Architecture Terminology. Disponível em: &lt;https://www.rfc-editor.org/info/rfc7426/&gt;. Acesso em: 19 out. 2026.
+                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 1953</b>: Ipsilon Flow Management Protocol Specification for IPv4 Version 1.0. Disponível em: &lt;https://www.rfc-editor.org/info/rfc1953&gt;.
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    KREUTZ, D. et al. Software-Defined Networking: A Comprehensive Survey. <b>Proceedings of the IEEE</b>, v. 103, n. 1, p. 14-76, jan. 2015. Disponível em: &lt;https://conferences.sigcomm.org/sigcomm/2015/pdf/papers/keynote.pdf&gt;. Acesso em: 19 out. 2026.
+                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 2297</b>: Ipsilon's General Switch Management Protocol Specification Version 2.0. Disponível em: &lt;https://www.rfc-editor.org/info/rfc2297&gt;.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 7149</b>: Software-Defined Networking: A Perspective from Within a Service Provider Environment. Disponível em: &lt;https://www.rfc-editor.org/info/rfc7149&gt;.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    INTERNET ENGINEERING TASK FORCE (IETF). <b>RFC 7426</b>: Software-Defined Networking (SDN): Layers and Architecture Terminology. Disponível em: &lt;https://www.rfc-editor.org/info/rfc7426/&gt;.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    JAIN, S. et al. B4: Experience with a Globally-Deployed Software Defined WAN. In: ACM SIGCOMM, 2013, Hong Kong. <b>Proceedings...</b> New York: ACM, 2013.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    KREUTZ, D. et al. Software-Defined Networking: A Comprehensive Survey. <b>Proceedings of the IEEE</b>, v. 103, n. 1, p. 14-76, jan. 2015. Disponível em: &lt;https://conferences.sigcomm.org/sigcomm/2015/pdf/papers/keynote.pdf&gt;.
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
@@ -744,7 +884,23 @@
                 </p>
 
                 <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
-                    SILVA, A. et al. Security in Software-Defined Networking: A survey. <b>Security and Communication Networks</b>, v. 2018, p. 1-22, 2018. Disponível em: &lt;https://onlinelibrary.wiley.com/doi/abs/10.1002/sec.1737&gt;. Acesso em: 19 out. 2026.
+                    SCOTT-HAYWARD, S.; NATARAJAN, S.; SEZER, S. A Survey of Security in Software Defined Networks. <b>IEEE Communications Surveys &amp; Tutorials</b>, v. 18, n. 1, 2016.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    SHIN, S.; GU, G. Attacking Software-Defined Networks: A First Feasibility Study. In: HOTSDN, 2., 2013, Hong Kong. <b>Proceedings...</b> New York: ACM, 2013.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    SHIN, S. et al. AVANT-GUARD: Scalable and Vigilant Switch Flow Management in Software-Defined Networks. In: ACM CCS, 2013, Berlim. <b>Proceedings...</b> New York: ACM, 2013.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    SILVA, A. et al. Security in Software-Defined Networking: A survey. <b>Security and Communication Networks</b>, v. 2018, p. 1-22, 2018. Disponível em: &lt;https://onlinelibrary.wiley.com/doi/abs/10.1002/sec.1737&gt;.
+                </p>
+
+                <p style="text-indent: -2cm; padding-left: 2cm; margin-bottom: 12px;">
+                    YAN, Q. et al. Software-Defined Networking (SDN) and Distributed Denial of Service (DDoS) Attacks in Cloud Computing Environments: A Survey, Some Research Issues, and Challenges. <b>IEEE Communications Surveys &amp; Tutorials</b>, v. 18, n. 1, 2016.
                 </p>
             </div>
         </section>
